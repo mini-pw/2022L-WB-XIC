@@ -8,4 +8,6 @@ Projekty:
 1. [Kandinsky Patterns](https://www.sciencedirect.com/science/article/pii/S0004370221000977)
 2. TBA
 
-
+Materiały:
+1. [Neural Network Playground](https://playground.tensorflow.org)
+2. [Neural networks by 3Blue1Brown](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
