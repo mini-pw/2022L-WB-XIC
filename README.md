@@ -33,7 +33,7 @@ Materiały:
     <td>2</td>
     <td>2022</td>
     <td>Wstęp do sieci neuronowych i PyTorch.</td>
-    <td rowspan="2">Praca domowa 1 (8 pkt)</td>
+    <td rowspan="2">Praca domowa 1 <br> (8 pkt)</td>
   </tr>
     <tr>
     <td>3</td>
@@ -45,7 +45,7 @@ Materiały:
     <td>4</td>
     <td>2022</td>
     <td>Wstęp do konwolucyjnych sieci neuronowych (ResNet, DenseNet).</td>
-	<td rowspan="2">Praca domowa 2 (8 pkt)</td>
+	<td rowspan="2">Praca domowa 2 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>5</td>
@@ -57,7 +57,7 @@ Materiały:
     <td>6</td>
     <td>2022</td>
     <td>Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (LIME, SHAP, Grad-CAM etc.).</td>
-	<td rowspan="2">Praca domowa 3 (8 pkt)</td>
+	<td rowspan="2">Praca domowa 3 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>7</td>
@@ -68,7 +68,7 @@ Materiały:
     <td>8</td>
     <td>2022</td>
     <td>Przegląd danych związanych z projektem.</td>
-    <td rowspan="2">Kamień milowy 1 (8 pkt)</td>
+    <td rowspan="2">Kamień milowy 1 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>9</td>
@@ -79,7 +79,7 @@ Materiały:
     <td>10</td>
     <td>2022</td>
     <td>Przegląd modeli związanych z projektem.</td>
-    <td rowspan="2">Kamień milowy 2 (8 pkt)</td>
+    <td rowspan="2">Kamień milowy 2 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>11</td>
@@ -90,7 +90,7 @@ Materiały:
     <td>12</td>
     <td>2022</td>
     <td>Przegląd wyjaśnień związanych z projektem.</td>
-    <td rowspan="2">Kamień milowy 3 (8 pkt)</td>
+    <td rowspan="2">Kamień milowy 3 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>13</td>
@@ -114,7 +114,8 @@ Materiały:
 </table>
 
 ## Zasady oceniania (100 pkt)
--   praca na laboratoriach -- 6 x 8 = 48 pkt.
--   prezentacja -- 16 pkt.
+
+-   praca podczas projektu -- 6 x 8 = 48 pkt.
+-   prezentacja końcowa -- 16 pkt.
 -   raport końcowy -- 32 pkt.
 -   stosowanie dobrych praktyk wykorzystania GitHub -- 4 pkt.
