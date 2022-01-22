@@ -11,6 +11,11 @@ Projekty:
 Materiały:
 1. [Neural Network Playground](https://playground.tensorflow.org)
 2. [Neural networks by 3Blue1Brown](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
+3. .
+
+Dane:
+1. Fashion-MNIST: [[GitHub](https://github.com/zalandoresearch/fashion-mnist)] [[PyTorch](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)]
+2. .
 
 ## Terminy i tematy zajęć 
 
@@ -33,7 +38,7 @@ Materiały:
     <td>2</td>
     <td>2022</td>
     <td>Wstęp do sieci neuronowych i PyTorch.</td>
-    <td rowspan="2">Praca domowa 1 <br> (8 pkt)</td>
+    <td rowspan="2">PD-1 <br> (8 pkt)</td>
   </tr>
     <tr>
     <td>3</td>
@@ -45,7 +50,7 @@ Materiały:
     <td>4</td>
     <td>2022</td>
     <td>Wstęp do konwolucyjnych sieci neuronowych (ResNet, DenseNet).</td>
-	<td rowspan="2">Praca domowa 2 <br> (8 pkt)</td>
+	<td rowspan="2">PD-2 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>5</td>
@@ -56,8 +61,8 @@ Materiały:
   <tr>
     <td>6</td>
     <td>2022</td>
-    <td>Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (LIME, SHAP, Grad-CAM etc.).</td>
-	<td rowspan="2">Praca domowa 3 <br> (8 pkt)</td>
+    <td>Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (SHAP, IG etc.).</td>
+	<td rowspan="2">PD-3 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>7</td>
@@ -68,7 +73,7 @@ Materiały:
     <td>8</td>
     <td>2022</td>
     <td>Przegląd danych związanych z projektem.</td>
-    <td rowspan="2">Kamień milowy 1 <br> (8 pkt)</td>
+    <td rowspan="2">KM-1 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>9</td>
@@ -79,7 +84,7 @@ Materiały:
     <td>10</td>
     <td>2022</td>
     <td>Przegląd modeli związanych z projektem.</td>
-    <td rowspan="2">Kamień milowy 2 <br> (8 pkt)</td>
+    <td rowspan="2">KM-2 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>11</td>
@@ -90,7 +95,7 @@ Materiały:
     <td>12</td>
     <td>2022</td>
     <td>Przegląd wyjaśnień związanych z projektem.</td>
-    <td rowspan="2">Kamień milowy 3 <br> (8 pkt)</td>
+    <td rowspan="2">KM-3 <br> (8 pkt)</td>
   </tr>
   <tr>
     <td>13</td>
