@@ -13,6 +13,11 @@ Materiały:
 2. [Neural networks by 3Blue1Brown](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
 3. .
 
+Technologie:
+1. [torch](https://pytorch.org/)
+2. [captum](https://captum.ai/) - Model Interpretability for PyTorch
+3. [shap](https://github.com/slundberg/shap) - SHapley Additive exPlanations
+
 Dane:
 1. Fashion-MNIST: [[GitHub](https://github.com/zalandoresearch/fashion-mnist)] [[PyTorch](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)]
 2. .
@@ -35,17 +40,17 @@ Dane:
     <td>Opis zajęć i przedstawienie tematyki projektu.</td>
     <td></td>
   </tr>
+  <tr>
     <td>2</td>
     <td>2022</td>
     <td>Wstęp do sieci neuronowych i PyTorch.</td>
     <td rowspan="2">PD-1 <br> (8 pkt)</td>
   </tr>
-    <tr>
+  <tr>
     <td>3</td>
     <td>2022</td>
     <td>Sieci neuronowe w praktyce.</td>
   </tr>
-  <tr>
   <tr>
     <td>4</td>
     <td>2022</td>
@@ -58,7 +63,6 @@ Dane:
     <td>Konwolucyjne sieci neuronowe w praktyce.</td>
   </tr>
   <tr>
-  <tr>
     <td>6</td>
     <td>2022</td>
     <td>Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (SHAP, IG etc.).</td>
@@ -69,6 +73,7 @@ Dane:
     <td>2022</td>
     <td>Wyjaśnienia konwolucyjnych sieci neuronowych w praktyce.</td>
   </tr>
+	<tr><td colspan="4"></td></tr>
   <tr>
     <td>8</td>
     <td>2022</td>
@@ -105,10 +110,9 @@ Dane:
   <tr>
     <td>14</td>
     <td>2022</td>
-    <td>---</td>
+    <td>*Manipulowanie wyjaśnieniami sieci neuronowych.</td>
     <td></td>
   </tr>
-
   <tr>
     <td>15</td>
     <td>2022</td>
