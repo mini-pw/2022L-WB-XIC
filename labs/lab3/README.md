@@ -1,6 +1,6 @@
 URLs:
 - [SoftMax](https://d2l.ai/chapter_linear-networks/softmax-regression-concise.html#softmax-implementation-revisited)
-- [MLP](https://d2l.ai/chapter_linear-networks/softmax-regression-concise.html#softmax-implementation-revisited)
+- [MLP](https://d2l.ai/chapter_multilayer-perceptrons/mlp.html)
 - [torch.sigmoid](https://pytorch.org/docs/stable/generated/torch.sigmoid)
 - [torch.nn.SoftMax](https://pytorch.org/docs/stable/generated/torch.nn.Softmax)
 - [torch.nn.ReLU](https://pytorch.org/docs/stable/generated/torch.nn.ReLU)
