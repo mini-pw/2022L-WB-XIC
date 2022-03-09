@@ -18,7 +18,7 @@ Materiały:
 5. [Explanatory Model Analysis. Explore, Explain and Examine Predictive Models](https://pbiecek.github.io/ema/)
 
 Technologie:
-- [torch](https://pytorch.org/)
+- [torch](https://pytorch.org/), [torchvision](https://pytorch.org/vision)
 - [captum](https://captum.ai/) - Model Interpretability for PyTorch
 - [shap](https://github.com/slundberg/shap) - SHapley Additive exPlanations
 
@@ -54,20 +54,20 @@ Literatura:
   <tr>
     <td>2</td>
     <td>03-03</td>
-    <td>Wstęp do sieci neuronowych i PyTorch.</td>
-    <td>PD-1 start</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab2" target="_blank">Wstęp do sieci neuronowych i PyTorch.</a></td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd1" target="_blank">PD-1 start</a></td>
   </tr>
   <tr>
     <td>3</td>
     <td>03-10</td>
-    <td>Sieci neuronowe w praktyce.</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab3" target="_blank">Sieci neuronowe w praktyce.</a></td>
     <td></td>
   </tr>
   <tr>
     <td>4</td>
     <td>03-17</td>
     <td>Wstęp do konwolucyjnych sieci neuronowych (ResNet, DenseNet).</td>
-	  <td>PD-1 oddanie,<br>PD-2 start</td>
+	  <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd1" target="_blank">PD-1 oddanie</a>,<br>PD-2 start</td>
   </tr>
   <tr>
     <td>5</td>
