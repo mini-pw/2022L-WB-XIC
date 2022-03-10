@@ -11,6 +11,12 @@ Indywidualnie, zaimplementować model sieci neuronowej (MLP) do klasyfikacji w `
 
 **Uwaga!** Warto zacząć od uczenia bardzo małych sieci i stopniowo zwiększać ich skomplikowanie.
 
+Praca domowa jest na 8 punktów (można uzyskać max 10 punktów).
+
 Deadline: 16 marca 23:59. Na zajęciach 17 marca 5 wybranch osób krótko zaprezentuje swoje wyniki.
 
 Pracę zgłaszamy poprzez PR o tytule `[PD1] Imię Nazwisko` do folderu `homeworks/pd1/imię_nazwisko`.
+
+# Przykład zbioru danych XOR
+
+![](dataset_xor.png)
