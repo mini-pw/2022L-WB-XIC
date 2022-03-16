@@ -66,13 +66,13 @@ Literatura:
   <tr>
     <td>4</td>
     <td>03-17</td>
-    <td>Wstęp do konwolucyjnych sieci neuronowych (ResNet, DenseNet).</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab4" target="_blank">Wstęp do konwolucyjnych sieci neuronowych.</a></td>
 	  <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd1" target="_blank">PD-1 oddanie</a>,<br>PD-2 start</td>
   </tr>
   <tr>
     <td>5</td>
     <td>03-24</td>
-    <td>Konwolucyjne sieci neuronowe w praktyce.</td>
+    <td>Konwolucyjne sieci neuronowe w praktyce (ResNet, DenseNet).</td>
     <td></td>
   </tr>
   <tr>
