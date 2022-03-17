@@ -67,7 +67,8 @@ Literatura:
     <td>4</td>
     <td>03-17</td>
     <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab4" target="_blank">Wstęp do konwolucyjnych sieci neuronowych.</a></td>
-	  <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd1" target="_blank">PD-1 oddanie</a>,<br>PD-2 start</td>
+	  <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd1" target="_blank">PD-1 oddanie</a>,
+		  <br><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd2" target="_blank">PD-2 start</a></td>
   </tr>
   <tr>
     <td>5</td>
@@ -79,7 +80,8 @@ Literatura:
     <td>6</td>
     <td>03-31</td>
     <td>Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (SHAP, IG etc.).</td>
-	  <td>PD-2 oddanie,<br>PD-3 start</td>
+	  <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd2" target="_blank">PD-2 oddanie</a>,
+		  <br>PD-3 start</td>
   </tr>
   <tr>
     <td>7</td>
