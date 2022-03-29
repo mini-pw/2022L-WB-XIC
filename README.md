@@ -73,7 +73,7 @@ Literatura:
   <tr>
     <td>5</td>
     <td>03-24</td>
-    <td>Konwolucyjne sieci neuronowe w praktyce (ResNet, DenseNet).</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab5" target="_blank">Konwolucyjne sieci neuronowe w praktyce (ResNet, DenseNet).</a></td>
     <td></td>
   </tr>
   <tr>
