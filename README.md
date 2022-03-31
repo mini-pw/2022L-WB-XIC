@@ -11,10 +11,10 @@ Projekty:
 2. Zostanie podany na zajęciach
 
 Materiały:
-1. [Neural networks by 3Blue1Brown](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi), [Neural Network Playground](https://playground.tensorflow.org)
+1. [Neural networks by 3Blue1Brown](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi); [Neural Network Playground](https://playground.tensorflow.org)
 2. [An Introduction to Statistical Learning, **Chapter 10**](https://www.statlearning.com/)
-3. [Interpretable Machine Learning. A Guide for Making Black Box Models Explainable, **Chapter 10**](https://christophm.github.io/interpretable-ml-book/)
-4. [Dive into Deep Learning, **Chapters 1-7**](https://d2l.ai/index.html)
+3. [Interpretable Machine Learning. A Guide for Making Black Box Models Explainable, **Chapter 10**](https://christophm.github.io/interpretable-ml-book/neural-networks)
+4. [Dive into Deep Learning, **Chapters 1-7**](https://d2l.ai/index.html); [CNN Explainer](https://poloclub.github.io/cnn-explainer)
 5. [Explanatory Model Analysis. Explore, Explain and Examine Predictive Models](https://pbiecek.github.io/ema/)
 
 Technologie:
@@ -24,13 +24,18 @@ Technologie:
 
 Dane:
 - Fashion-MNIST: [[GitHub](https://github.com/zalandoresearch/fashion-mnist)] [[PyTorch](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)]
-- .
+- CIFAR10: [[PyTorch](https://pytorch.org/vision/main/generated/torchvision.datasets.CIFAR10.html)]
 
 Literatura:
-- M. T. Ribeiro et al. **"Why Should I Trust You?": Explaining the Predictions of Any Classifier.** KDD, 2016. https://doi.org/10.1145/2939672.2939778
-- S. M. Lundberg & S. Lee. **A Unified Approach to Interpreting Model Predictions.** NeurIPS, 2017. https://dl.acm.org/doi/10.5555/3295222.3295230
-- M. Sundararajan et al. **Axiomatic attribution for deep networks.** ICML, 2017. https://dl.acm.org/doi/10.5555/3305890.3306024
-- J. Adebayo et al. **Sanity Checks for Saliency Maps.** NeurIPS, 2018. https://dl.acm.org/doi/10.5555/3327546.3327621
+- Y. LeCun et al. **Backpropagation Applied to Handwritten Zip Code Recognition.** *Neural Computation*, 1989. https://www.doi.org/10.1162/neco.1989.1.4.541; http://yann.lecun.com/exdb/publis/pdf/lecun-89e.pdf
+- A. Krizhevsky et al. **ImageNet Classification with Deep Convolutional Neural Networks.** *NeurIPS*, 2012. https://papers.nips.cc/paper/2012/hash/c399862d3b9d6b76c8436e924a68c45b-Abstract.html
+- S. Ioffe & C. Szegedy. **Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.** *ICML*, 2015. https://dl.acm.org/doi/10.5555/3045118.3045167; https://arxiv.org/abs/1502.03167
+- K. He et al. **Deep Residual Learning for Image Recognition.** *CVPR*, 2016. https://www.doi.org/10.1109/CVPR.2016.90; https://arxiv.org/abs/1512.03385
+- M. T. Ribeiro et al. **"Why Should I Trust You?": Explaining the Predictions of Any Classifier.** *KDD*, 2016. https://www.doi.org/10.1145/2939672.2939778; https://arxiv.org/abs/1602.04938
+- G. Huang et al. **Densely Connected Convolutional Networks.** *CVPR*, 2017. https://www.doi.org/10.1109/CVPR.2017.243; https://arxiv.org/abs/1608.06993
+- M. Sundararajan et al. **Axiomatic attribution for deep networks.** *ICML*, 2017. https://dl.acm.org/doi/10.5555/3305890.3306024; https://arxiv.org/abs/1703.01365
+- S. M. Lundberg & S. Lee. **A Unified Approach to Interpreting Model Predictions.** *NeurIPS*, 2017. https://dl.acm.org/doi/10.5555/3295222.3295230; https://arxiv.org/abs/1705.07874
+- J. Adebayo et al. **Sanity Checks for Saliency Maps.** *NeurIPS*, 2018. https://dl.acm.org/doi/10.5555/3327546.3327621; https://arxiv.org/abs/1810.03292
  
 
 ## Terminy zajęć 
