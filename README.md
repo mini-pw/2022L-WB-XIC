@@ -24,7 +24,9 @@ Technologie:
 
 Dane:
 - Fashion-MNIST: [[GitHub](https://github.com/zalandoresearch/fashion-mnist)] [[PyTorch](https://pytorch.org/vision/stable/datasets.html#fashion-mnist)]
-- CIFAR10: [[PyTorch](https://pytorch.org/vision/main/generated/torchvision.datasets.CIFAR10.html)]
+- CIFAR10: [[PyTorch](https://pytorch.org/vision/main/generated/torchvision.datasets.CIFAR10.html)]; CIFAR100: [[PyTorch](https://pytorch.org/vision/main/generated/torchvision.datasets.CIFAR100.html)]
+- ImageNet: [[.org](https://image-net.org/)]
+- Kandinsky Patterns: [[GitHub](https://github.com/human-centered-ai-lab/dat-kandinsky-patterns)]
 
 Literatura:
 - Y. LeCun et al. **Backpropagation Applied to Handwritten Zip Code Recognition.** *Neural Computation*, 1989. https://www.doi.org/10.1162/neco.1989.1.4.541; http://yann.lecun.com/exdb/publis/pdf/lecun-89e.pdf
@@ -36,7 +38,7 @@ Literatura:
 - M. Sundararajan et al. **Axiomatic attribution for deep networks.** *ICML*, 2017. https://dl.acm.org/doi/10.5555/3305890.3306024; https://arxiv.org/abs/1703.01365
 - S. M. Lundberg & S. Lee. **A Unified Approach to Interpreting Model Predictions.** *NeurIPS*, 2017. https://dl.acm.org/doi/10.5555/3295222.3295230; https://arxiv.org/abs/1705.07874
 - J. Adebayo et al. **Sanity Checks for Saliency Maps.** *NeurIPS*, 2018. https://dl.acm.org/doi/10.5555/3327546.3327621; https://arxiv.org/abs/1810.03292
- 
+- H. Müller & A. Holzinger **Kandinsky Patterns.** *Artificial Intelligence*, 2021. https://doi.org/10.1016/j.artint.2021.103546
 
 ## Terminy zajęć 
 
