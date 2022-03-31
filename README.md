@@ -101,7 +101,7 @@ Literatura:
     <td>8</td>
     <td>04-14</td>
     <td>Przegląd danych związanych z projektem.</td>
-    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd2" target="_blank">PD-3 oddanie</a></td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd3" target="_blank">PD-3 oddanie</a></td>
   </tr>
   <tr>
     <td>9</td>
