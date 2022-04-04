@@ -1,0 +1,681 @@
+<html>
+<head>
+<title>pd2.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #808080;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6897bb;}
+.s3 { color: #cc7832;}
+.s4 { color: #6a8759;}
+.s5 { color: #629755; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+pd2.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% 
+</span><span class="s1">!pip install captum</span>
+<span class="s0">#%% 
+</span><span class="s1">torch.cuda.current_device()</span>
+<span class="s0">#%% 
+</span><span class="s1">torch.cuda.device_count()</span>
+<span class="s0">#%% 
+</span><span class="s1">torch.cuda.get_device_name(</span><span class="s2">0</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s3">import </span><span class="s1">torch</span>
+<span class="s3">import </span><span class="s1">tensorflow </span><span class="s3">as </span><span class="s1">tf</span>
+<span class="s3">import </span><span class="s1">captum</span>
+<span class="s3">import </span><span class="s1">numpy </span><span class="s3">as </span><span class="s1">np</span>
+<span class="s3">import </span><span class="s1">torch.nn </span><span class="s3">as </span><span class="s1">nn</span>
+<span class="s3">import </span><span class="s1">torch.nn.functional </span><span class="s3">as </span><span class="s1">F</span>
+<span class="s3">import </span><span class="s1">torchvision</span>
+<span class="s3">import </span><span class="s1">time</span>
+<span class="s3">import </span><span class="s1">pandas </span><span class="s3">as </span><span class="s1">pd</span>
+<span class="s3">import </span><span class="s1">json</span>
+<span class="s3">from </span><span class="s1">IPython.display </span><span class="s3">import </span><span class="s1">clear_output</span>
+<span class="s3">from </span><span class="s1">torch.utils.tensorboard </span><span class="s3">import </span><span class="s1">SummaryWriter </span><span class="s0"># TensorBoard support</span>
+
+<span class="s0">#%% 
+</span><span class="s3">if </span><span class="s1">torch.cuda.is_available():  </span>
+  <span class="s1">DEVICE = </span><span class="s4">&quot;cuda:0&quot; </span>
+<span class="s3">else</span><span class="s1">:  </span>
+  <span class="s1">DEVICE = </span><span class="s4">&quot;cpu&quot; </span>
+<span class="s0">#%% 
+</span><span class="s1">print(</span><span class="s4">'PyTorch Version: '</span><span class="s3">, </span><span class="s1">torch.__version__)</span>
+<span class="s1">DEVICE = torch.device(</span><span class="s4">'cuda:0' </span><span class="s3">if </span><span class="s1">torch.cuda.is_available() </span><span class="s3">else </span><span class="s4">'cpu'</span><span class="s1">)</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Ściągnięcie anych ze zbioru CIFAR10  
+</span><span class="s0">#%% 
+</span><span class="s1">train_set = torchvision.datasets.CIFAR10(</span>
+    <span class="s1">root = </span><span class="s4">'./data/CIFAR10/train'</span><span class="s3">,</span>
+    <span class="s1">train = </span><span class="s3">True,</span>
+    <span class="s1">download = </span><span class="s3">True,</span>
+    <span class="s1">transform = torchvision.transforms.Compose([</span>
+        <span class="s1">torchvision.transforms.ToTensor()                                 </span>
+    <span class="s1">])</span>
+<span class="s1">)</span>
+
+<span class="s0"># Use standard FashionMNIST dataset</span>
+<span class="s1">test_set = torchvision.datasets.CIFAR10(</span>
+    <span class="s1">root = </span><span class="s4">'./data/CIFAR10/test'</span><span class="s3">,</span>
+    <span class="s1">train = </span><span class="s3">False,</span>
+    <span class="s1">download = </span><span class="s3">True,</span>
+    <span class="s1">transform = torchvision.transforms.Compose([</span>
+        <span class="s1">torchvision.transforms.ToTensor()                                 </span>
+    <span class="s1">])</span>
+<span class="s1">)</span>
+<span class="s0">#%% md 
+</span><span class="s1">### Podzbiór danych CIFAR10  
+Podzbiór składa się z 17000 obrazków, po 1700 z każdej klasy. 
+</span><span class="s0">#%% 
+</span><span class="s1">y_train1 = np.asarray(train_set.targets)</span>
+<span class="s1">X_train1 = np.asarray(train_set.data)</span>
+
+<span class="s1">np.random.seed(seed=</span><span class="s2">123</span><span class="s1">)</span>
+<span class="s1">indices1=np.empty(</span><span class="s2">0</span><span class="s3">,</span><span class="s1">dtype=</span><span class="s4">&quot;int8&quot;</span><span class="s1">)</span>
+<span class="s3">for </span><span class="s1">i </span><span class="s3">in </span><span class="s1">range(</span><span class="s2">0</span><span class="s3">,</span><span class="s1">len(np.unique(y_train1))):</span>
+    <span class="s1">indices1=np.append(indices1</span><span class="s3">,</span><span class="s1">np.random.choice(np.where((y_train1[</span><span class="s2">0</span><span class="s1">:len(y_train1)])==i)[</span><span class="s2">0</span><span class="s1">]</span><span class="s3">,</span><span class="s2">1700</span><span class="s3">,</span><span class="s1">replace=</span><span class="s3">False</span><span class="s1">))</span>
+    <span class="s1">indices1.sort()</span>
+
+<span class="s1">y_train = y_train1[indices1]</span>
+<span class="s1">X_train = X_train1[indices1]</span>
+
+<span class="s1">train_subset = torch.utils.data.Subset(train_set</span><span class="s3">, </span><span class="s1">indices1)</span>
+<span class="s0">#%% 
+</span><span class="s3">from </span><span class="s1">collections  </span><span class="s3">import </span><span class="s1">OrderedDict</span>
+<span class="s1">params = OrderedDict(</span>
+    <span class="s1">lr = [</span><span class="s2">.01</span><span class="s3">,</span><span class="s2">0.001</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">batch_size = [</span><span class="s2">100</span><span class="s3">,</span><span class="s2">1000</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">shuffle = [</span><span class="s3">True, False</span><span class="s1">]</span><span class="s3">,</span>
+<span class="s1">)</span>
+<span class="s1">epochs = </span><span class="s2">3</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Model ResNet  
+Porównanie wielkości 18 i 34 
+</span><span class="s0">#%% 
+</span><span class="s3">class </span><span class="s1">BasicBlock(nn.Module):</span>
+    <span class="s1">expansion = </span><span class="s2">1</span>
+
+    <span class="s3">def </span><span class="s1">__init__(self</span><span class="s3">, </span><span class="s1">in_planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">stride=</span><span class="s2">1</span><span class="s1">):</span>
+        <span class="s1">super(BasicBlock</span><span class="s3">, </span><span class="s1">self).__init__()</span>
+        <span class="s1">self.conv1 = nn.Conv2d(</span>
+            <span class="s1">in_planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">kernel_size=</span><span class="s2">3</span><span class="s3">, </span><span class="s1">stride=stride</span><span class="s3">, </span><span class="s1">padding=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span>
+        <span class="s1">self.bn1 = nn.BatchNorm2d(planes)</span>
+        <span class="s1">self.conv2 = nn.Conv2d(planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">kernel_size=</span><span class="s2">3</span><span class="s3">,</span>
+                               <span class="s1">stride=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">padding=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span>
+        <span class="s1">self.bn2 = nn.BatchNorm2d(planes)</span>
+
+        <span class="s1">self.shortcut = nn.Sequential()</span>
+        <span class="s3">if </span><span class="s1">stride != </span><span class="s2">1 </span><span class="s3">or </span><span class="s1">in_planes != self.expansion*planes:</span>
+            <span class="s1">self.shortcut = nn.Sequential(</span>
+                <span class="s1">nn.Conv2d(in_planes</span><span class="s3">, </span><span class="s1">self.expansion*planes</span><span class="s3">,</span>
+                          <span class="s1">kernel_size=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">stride=stride</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span><span class="s3">,</span>
+                <span class="s1">nn.BatchNorm2d(self.expansion*planes)</span>
+            <span class="s1">)</span>
+
+    <span class="s3">def </span><span class="s1">forward(self</span><span class="s3">, </span><span class="s1">x):</span>
+        <span class="s1">out = F.relu(self.bn1(self.conv1(x)))</span>
+        <span class="s1">out = self.bn2(self.conv2(out))</span>
+        <span class="s1">out += self.shortcut(x)</span>
+        <span class="s1">out = F.relu(out)</span>
+        <span class="s3">return </span><span class="s1">out</span>
+
+<span class="s0">#%% 
+</span><span class="s3">class </span><span class="s1">Bottleneck(nn.Module):</span>
+    <span class="s1">expansion = </span><span class="s2">4</span>
+
+    <span class="s3">def </span><span class="s1">__init__(self</span><span class="s3">, </span><span class="s1">in_planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">stride=</span><span class="s2">1</span><span class="s1">):</span>
+        <span class="s1">super(Bottleneck</span><span class="s3">, </span><span class="s1">self).__init__()</span>
+        <span class="s1">self.conv1 = nn.Conv2d(in_planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">kernel_size=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span>
+        <span class="s1">self.bn1 = nn.BatchNorm2d(planes)</span>
+        <span class="s1">self.conv2 = nn.Conv2d(planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">kernel_size=</span><span class="s2">3</span><span class="s3">,</span>
+                               <span class="s1">stride=stride</span><span class="s3">, </span><span class="s1">padding=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span>
+        <span class="s1">self.bn2 = nn.BatchNorm2d(planes)</span>
+        <span class="s1">self.conv3 = nn.Conv2d(planes</span><span class="s3">, </span><span class="s1">self.expansion *</span>
+                               <span class="s1">planes</span><span class="s3">, </span><span class="s1">kernel_size=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span>
+        <span class="s1">self.bn3 = nn.BatchNorm2d(self.expansion*planes)</span>
+
+        <span class="s1">self.shortcut = nn.Sequential()</span>
+        <span class="s3">if </span><span class="s1">stride != </span><span class="s2">1 </span><span class="s3">or </span><span class="s1">in_planes != self.expansion*planes:</span>
+            <span class="s1">self.shortcut = nn.Sequential(</span>
+                <span class="s1">nn.Conv2d(in_planes</span><span class="s3">, </span><span class="s1">self.expansion*planes</span><span class="s3">,</span>
+                          <span class="s1">kernel_size=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">stride=stride</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span><span class="s3">,</span>
+                <span class="s1">nn.BatchNorm2d(self.expansion*planes)</span>
+            <span class="s1">)</span>
+
+    <span class="s3">def </span><span class="s1">forward(self</span><span class="s3">, </span><span class="s1">x):</span>
+        <span class="s1">out = F.relu(self.bn1(self.conv1(x)))</span>
+        <span class="s1">out = F.relu(self.bn2(self.conv2(out)))</span>
+        <span class="s1">out = self.bn3(self.conv3(out))</span>
+        <span class="s1">out += self.shortcut(x)</span>
+        <span class="s1">out = F.relu(out)</span>
+        <span class="s3">return </span><span class="s1">out</span>
+
+
+<span class="s0">#%% 
+</span><span class="s3">class </span><span class="s1">ResNet(nn.Module):</span>
+    <span class="s3">def </span><span class="s1">__init__(self</span><span class="s3">, </span><span class="s1">block</span><span class="s3">, </span><span class="s1">num_blocks</span><span class="s3">, </span><span class="s1">num_classes=</span><span class="s2">10</span><span class="s1">):</span>
+        <span class="s1">super(ResNet</span><span class="s3">, </span><span class="s1">self).__init__()</span>
+        <span class="s1">self.in_planes = </span><span class="s2">64</span>
+
+        <span class="s1">self.conv1 = nn.Conv2d(</span><span class="s2">3</span><span class="s3">, </span><span class="s2">64</span><span class="s3">, </span><span class="s1">kernel_size=</span><span class="s2">3</span><span class="s3">,</span>
+                               <span class="s1">stride=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">padding=</span><span class="s2">1</span><span class="s3">, </span><span class="s1">bias=</span><span class="s3">False</span><span class="s1">)</span>
+        <span class="s1">self.bn1 = nn.BatchNorm2d(</span><span class="s2">64</span><span class="s1">)</span>
+        <span class="s1">self.layer1 = self._make_layer(block</span><span class="s3">, </span><span class="s2">64</span><span class="s3">, </span><span class="s1">num_blocks[</span><span class="s2">0</span><span class="s1">]</span><span class="s3">, </span><span class="s1">stride=</span><span class="s2">1</span><span class="s1">)</span>
+        <span class="s1">self.layer2 = self._make_layer(block</span><span class="s3">, </span><span class="s2">128</span><span class="s3">, </span><span class="s1">num_blocks[</span><span class="s2">1</span><span class="s1">]</span><span class="s3">, </span><span class="s1">stride=</span><span class="s2">2</span><span class="s1">)</span>
+        <span class="s1">self.layer3 = self._make_layer(block</span><span class="s3">, </span><span class="s2">256</span><span class="s3">, </span><span class="s1">num_blocks[</span><span class="s2">2</span><span class="s1">]</span><span class="s3">, </span><span class="s1">stride=</span><span class="s2">2</span><span class="s1">)</span>
+        <span class="s1">self.layer4 = self._make_layer(block</span><span class="s3">, </span><span class="s2">512</span><span class="s3">, </span><span class="s1">num_blocks[</span><span class="s2">3</span><span class="s1">]</span><span class="s3">, </span><span class="s1">stride=</span><span class="s2">2</span><span class="s1">)</span>
+        <span class="s1">self.linear = nn.Linear(</span><span class="s2">512</span><span class="s1">*block.expansion</span><span class="s3">, </span><span class="s1">num_classes)</span>
+
+    <span class="s3">def </span><span class="s1">_make_layer(self</span><span class="s3">, </span><span class="s1">block</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">num_blocks</span><span class="s3">, </span><span class="s1">stride):</span>
+        <span class="s1">strides = [stride] + [</span><span class="s2">1</span><span class="s1">]*(num_blocks-</span><span class="s2">1</span><span class="s1">)</span>
+        <span class="s1">layers = []</span>
+        <span class="s3">for </span><span class="s1">stride </span><span class="s3">in </span><span class="s1">strides:</span>
+            <span class="s1">layers.append(block(self.in_planes</span><span class="s3">, </span><span class="s1">planes</span><span class="s3">, </span><span class="s1">stride))</span>
+            <span class="s1">self.in_planes = planes * block.expansion</span>
+        <span class="s3">return </span><span class="s1">nn.Sequential(*layers)</span>
+
+    <span class="s3">def </span><span class="s1">forward(self</span><span class="s3">, </span><span class="s1">x):</span>
+        <span class="s1">out = F.relu(self.bn1(self.conv1(x)))</span>
+        <span class="s1">out = self.layer1(out)</span>
+        <span class="s1">out = self.layer2(out)</span>
+        <span class="s1">out = self.layer3(out)</span>
+        <span class="s1">out = self.layer4(out)</span>
+        <span class="s1">out = F.avg_pool2d(out</span><span class="s3">, </span><span class="s2">4</span><span class="s1">)</span>
+        <span class="s1">out = out.view(out.size(</span><span class="s2">0</span><span class="s1">)</span><span class="s3">, </span><span class="s1">-</span><span class="s2">1</span><span class="s1">)</span>
+        <span class="s1">out = self.linear(out)</span>
+        <span class="s3">return </span><span class="s1">out</span>
+
+<span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">ResNet18():</span>
+    <span class="s3">return </span><span class="s1">ResNet(BasicBlock</span><span class="s3">, </span><span class="s1">[</span><span class="s2">2</span><span class="s3">, </span><span class="s2">2</span><span class="s3">, </span><span class="s2">2</span><span class="s3">, </span><span class="s2">2</span><span class="s1">])</span>
+
+<span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">ResNet34():</span>
+    <span class="s3">return </span><span class="s1">ResNet(BasicBlock</span><span class="s3">, </span><span class="s1">[</span><span class="s2">3</span><span class="s3">, </span><span class="s2">4</span><span class="s3">, </span><span class="s2">6</span><span class="s3">, </span><span class="s2">3</span><span class="s1">])</span>
+<span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">Basic():</span>
+  <span class="s3">return </span><span class="s1">BasicBlock(</span><span class="s2">3</span><span class="s3">, </span><span class="s2">64</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">test():</span>
+    <span class="s1">net = ResNet18()</span>
+    <span class="s1">y = net(torch.randn(</span><span class="s2">1</span><span class="s3">, </span><span class="s2">3</span><span class="s3">, </span><span class="s2">32</span><span class="s3">, </span><span class="s2">32</span><span class="s1">))</span>
+    <span class="s1">print(y.size())</span>
+
+<span class="s1">test()</span>
+<span class="s0">#%% 
+# import modules to build RunBuilder and RunManager helper classes</span>
+<span class="s3">from </span><span class="s1">collections </span><span class="s3">import </span><span class="s1">namedtuple</span>
+<span class="s3">from </span><span class="s1">itertools </span><span class="s3">import </span><span class="s1">product</span>
+
+<span class="s0"># Read in the hyper-parameters and return a Run namedtuple containing all the </span>
+<span class="s0"># combinations of hyper-parameters</span>
+<span class="s3">class </span><span class="s1">RunBuilder():</span>
+  <span class="s1">@staticmethod</span>
+  <span class="s3">def </span><span class="s1">get_runs(params):</span>
+
+    <span class="s1">Run = namedtuple(</span><span class="s4">'Run'</span><span class="s3">, </span><span class="s1">params.keys())</span>
+
+    <span class="s1">runs = []</span>
+    <span class="s3">for </span><span class="s1">v </span><span class="s3">in </span><span class="s1">product(*params.values()):</span>
+      <span class="s1">runs.append(Run(*v))</span>
+    
+    <span class="s3">return </span><span class="s1">runs</span>
+
+<span class="s0"># Helper class, help track loss, accuracy, epoch time, run time, </span>
+<span class="s0"># hyper-parameters etc. Also record to TensorBoard and write into csv, json</span>
+<span class="s3">class </span><span class="s1">RunManager():</span>
+  <span class="s3">def </span><span class="s1">__init__(self):</span>
+
+    <span class="s0"># tracking every epoch count, loss, accuracy, time</span>
+    <span class="s1">self.epoch_count = </span><span class="s2">0</span>
+    <span class="s1">self.epoch_loss = </span><span class="s2">0</span>
+    <span class="s1">self.epoch_num_correct = </span><span class="s2">0</span>
+    <span class="s1">self.epoch_start_time = </span><span class="s3">None</span>
+
+    <span class="s0"># tracking every run count, run data, hyper-params used, time</span>
+    <span class="s1">self.run_params = </span><span class="s3">None</span>
+    <span class="s1">self.run_count = </span><span class="s2">0</span>
+    <span class="s1">self.run_data = []</span>
+    <span class="s1">self.run_start_time = </span><span class="s3">None</span>
+
+    <span class="s0"># record model, loader and TensorBoard </span>
+    <span class="s1">self.network = </span><span class="s3">None</span>
+    <span class="s1">self.loader = </span><span class="s3">None</span>
+    <span class="s1">self.loader_test = </span><span class="s3">None</span>
+    <span class="s1">self.tb = </span><span class="s3">None</span>
+
+  <span class="s0"># record the count, hyper-param, model, loader of each run</span>
+  <span class="s0"># record sample images and network graph to TensorBoard  </span>
+  <span class="s3">def </span><span class="s1">begin_run(self</span><span class="s3">, </span><span class="s1">run</span><span class="s3">, </span><span class="s1">network</span><span class="s3">, </span><span class="s1">train_loader</span><span class="s3">,</span><span class="s1">test_loader):</span>
+
+    <span class="s1">self.run_start_time = time.time()</span>
+
+    <span class="s1">self.run_params = run</span>
+    <span class="s1">self.run_count += </span><span class="s2">1</span>
+
+    <span class="s1">self.network = network</span>
+    <span class="s1">self.loader = train_loader</span>
+    <span class="s1">self.test_loader = test_loader</span>
+    <span class="s1">self.tb = SummaryWriter(comment=</span><span class="s4">f'-</span><span class="s3">{</span><span class="s1">run</span><span class="s3">}</span><span class="s4">'</span><span class="s1">)</span>
+
+    <span class="s1">images</span><span class="s3">, </span><span class="s1">labels = next(iter(self.loader))</span>
+    <span class="s1">grid = torchvision.utils.make_grid(images.to(DEVICE))</span>
+
+    <span class="s1">self.tb.add_image(</span><span class="s4">'images'</span><span class="s3">, </span><span class="s1">grid)</span>
+    <span class="s1">self.tb.add_graph(self.network</span><span class="s3">, </span><span class="s1">images.to(DEVICE))</span>
+
+  <span class="s0"># when run ends, close TensorBoard, zero epoch count</span>
+  <span class="s3">def </span><span class="s1">end_run(self):</span>
+    <span class="s1">self.tb.close()</span>
+    <span class="s1">self.epoch_count = </span><span class="s2">0</span>
+
+  <span class="s0"># zero epoch count, loss, accuracy, </span>
+  <span class="s3">def </span><span class="s1">begin_epoch(self):</span>
+    <span class="s1">self.epoch_start_time = time.time()</span>
+
+    <span class="s1">self.epoch_count += </span><span class="s2">1</span>
+    <span class="s1">self.epoch_loss = </span><span class="s2">0</span>
+    <span class="s1">self.epoch_num_correct = </span><span class="s2">0</span>
+
+    <span class="s1">self.epoch_loss_test = </span><span class="s2">0</span>
+    <span class="s1">self.epoch_num_correct_test = </span><span class="s2">0</span>
+
+  <span class="s0"># </span>
+  <span class="s3">def </span><span class="s1">end_epoch(self):</span>
+    <span class="s0"># calculate epoch duration and run duration(accumulate)</span>
+    <span class="s1">epoch_duration = time.time() - self.epoch_start_time</span>
+    <span class="s1">run_duration = time.time() - self.run_start_time</span>
+
+    <span class="s0"># record epoch loss and accuracy</span>
+    <span class="s1">loss = self.epoch_loss / len(self.loader.dataset)</span>
+    <span class="s1">accuracy = self.epoch_num_correct / len(self.loader.dataset)</span>
+
+    <span class="s1">accuracy_test = self.epoch_num_correct_test / len(self.test_loader.dataset)</span>
+
+    <span class="s0"># Record epoch loss and accuracy to TensorBoard </span>
+    <span class="s1">self.tb.add_scalar(</span><span class="s4">'Loss'</span><span class="s3">, </span><span class="s1">loss</span><span class="s3">, </span><span class="s1">self.epoch_count)</span>
+    <span class="s1">self.tb.add_scalar(</span><span class="s4">'Accuracy'</span><span class="s3">, </span><span class="s1">accuracy</span><span class="s3">, </span><span class="s1">self.epoch_count)</span>
+    <span class="s1">self.tb.add_scalar(</span><span class="s4">'Accuracy_test'</span><span class="s3">, </span><span class="s1">accuracy_test</span><span class="s3">, </span><span class="s1">self.epoch_count)</span>
+
+
+    <span class="s0"># Record params to TensorBoard</span>
+    <span class="s3">for </span><span class="s1">name</span><span class="s3">, </span><span class="s1">param </span><span class="s3">in </span><span class="s1">self.network.named_parameters():</span>
+      <span class="s1">self.tb.add_histogram(name</span><span class="s3">, </span><span class="s1">param</span><span class="s3">, </span><span class="s1">self.epoch_count)</span>
+      <span class="s1">self.tb.add_histogram(</span><span class="s4">f'</span><span class="s3">{</span><span class="s1">name</span><span class="s3">}</span><span class="s4">.grad'</span><span class="s3">, </span><span class="s1">param.grad</span><span class="s3">, </span><span class="s1">self.epoch_count)</span>
+    
+    <span class="s0"># Write into 'results' (OrderedDict) for all run related data</span>
+    <span class="s1">results = OrderedDict()</span>
+    <span class="s1">results[</span><span class="s4">&quot;run&quot;</span><span class="s1">] = self.run_count</span>
+    <span class="s1">results[</span><span class="s4">&quot;epoch&quot;</span><span class="s1">] = self.epoch_count</span>
+    <span class="s1">results[</span><span class="s4">&quot;loss&quot;</span><span class="s1">] = loss</span>
+    <span class="s1">results[</span><span class="s4">&quot;accuracy&quot;</span><span class="s1">] = accuracy</span>
+    <span class="s1">results[</span><span class="s4">&quot;accuracy_test&quot;</span><span class="s1">] = accuracy_test</span>
+    <span class="s1">results[</span><span class="s4">&quot;epoch duration&quot;</span><span class="s1">] = epoch_duration</span>
+    <span class="s1">results[</span><span class="s4">&quot;run duration&quot;</span><span class="s1">] = run_duration</span>
+
+    <span class="s0"># Record hyper-params into 'results'</span>
+    <span class="s3">for </span><span class="s1">k</span><span class="s3">,</span><span class="s1">v </span><span class="s3">in </span><span class="s1">self.run_params._asdict().items(): results[k] = v</span>
+    <span class="s1">self.run_data.append(results)</span>
+    <span class="s1">df = pd.DataFrame.from_dict(self.run_data</span><span class="s3">, </span><span class="s1">orient = </span><span class="s4">'columns'</span><span class="s1">)</span>
+
+    <span class="s0"># display epoch information and show progress</span>
+    <span class="s1">clear_output(wait=</span><span class="s3">True</span><span class="s1">)</span>
+    <span class="s1">display(df)</span>
+
+  <span class="s0"># accumulate loss of batch into entire epoch loss</span>
+  <span class="s3">def </span><span class="s1">track_loss(self</span><span class="s3">, </span><span class="s1">loss):</span>
+    <span class="s0"># multiply batch size so variety of batch sizes can be compared</span>
+    <span class="s1">self.epoch_loss += loss.item() * self.loader.batch_size</span>
+
+  <span class="s0"># accumulate number of corrects of batch into entire epoch num_correct</span>
+  <span class="s3">def </span><span class="s1">track_num_correct(self</span><span class="s3">, </span><span class="s1">preds</span><span class="s3">, </span><span class="s1">labels):</span>
+    <span class="s1">self.epoch_num_correct += self._get_num_correct(preds</span><span class="s3">, </span><span class="s1">labels)</span>
+
+<span class="s0"># accumulate number of corrects of batch in test set into entire epoch num_correct</span>
+  <span class="s3">def </span><span class="s1">track_num_correct_test(self</span><span class="s3">, </span><span class="s1">preds</span><span class="s3">, </span><span class="s1">labels):</span>
+    <span class="s1">self.epoch_num_correct_test += self._get_num_correct(preds</span><span class="s3">, </span><span class="s1">labels)</span>
+
+
+  <span class="s1">@torch.no_grad()</span>
+  <span class="s3">def </span><span class="s1">_get_num_correct(self</span><span class="s3">, </span><span class="s1">preds</span><span class="s3">, </span><span class="s1">labels):</span>
+    <span class="s3">return </span><span class="s1">preds.argmax(dim=</span><span class="s2">1</span><span class="s1">).eq(labels).sum().item()</span>
+  
+  <span class="s0"># save end results of all runs into csv, json for further analysis</span>
+  <span class="s3">def </span><span class="s1">save(self</span><span class="s3">, </span><span class="s1">fileName):</span>
+
+    <span class="s1">pd.DataFrame.from_dict(</span>
+        <span class="s1">self.run_data</span><span class="s3">, </span>
+        <span class="s1">orient = </span><span class="s4">'columns'</span><span class="s3">,</span>
+    <span class="s1">).to_csv(</span><span class="s4">f'</span><span class="s3">{</span><span class="s1">fileName</span><span class="s3">}</span><span class="s4">.csv'</span><span class="s1">)</span>
+
+    <span class="s3">with </span><span class="s1">open(</span><span class="s4">f'</span><span class="s3">{</span><span class="s1">fileName</span><span class="s3">}</span><span class="s4">.json'</span><span class="s3">, </span><span class="s4">'w'</span><span class="s3">, </span><span class="s1">encoding=</span><span class="s4">'utf-8'</span><span class="s1">) </span><span class="s3">as </span><span class="s1">f:</span>
+      <span class="s1">json.dump(self.run_data</span><span class="s3">, </span><span class="s1">f</span><span class="s3">, </span><span class="s1">ensure_ascii=</span><span class="s3">False, </span><span class="s1">indent=</span><span class="s2">4</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">run_eval(params</span><span class="s3">, </span><span class="s1">model</span><span class="s3">, </span><span class="s1">output_name</span><span class="s3">, </span><span class="s1">train_set):</span>
+  <span class="s1">m = RunManager()</span>
+
+  <span class="s0"># get all runs from params using RunBuilder class</span>
+  <span class="s3">for </span><span class="s1">run </span><span class="s3">in </span><span class="s1">RunBuilder.get_runs(params):</span>
+
+      <span class="s0"># if params changes, following line of code should reflect the changes too</span>
+      <span class="s1">network = model().to(DEVICE)</span>
+      <span class="s1">loader_test = torch.utils.data.DataLoader(test_set</span><span class="s3">, </span><span class="s1">batch_size = run.batch_size</span><span class="s3">,</span><span class="s1">num_workers=</span><span class="s2">2</span><span class="s1">)</span>
+      <span class="s1">loader_train = torch.utils.data.DataLoader(train_set</span><span class="s3">, </span><span class="s1">batch_size = run.batch_size</span><span class="s3">,</span><span class="s1">num_workers=</span><span class="s2">2</span><span class="s1">)</span>
+   
+      <span class="s0"># loader = torch.utils.data.DataLoader(train_set, batch_size = run.batch_size)</span>
+      <span class="s1">optimizer = torch.optim.Adam(network.parameters()</span><span class="s3">, </span><span class="s1">lr=run.lr)</span>
+
+      <span class="s1">m.begin_run(run</span><span class="s3">, </span><span class="s1">network</span><span class="s3">, </span><span class="s1">loader_train</span><span class="s3">, </span><span class="s1">loader_test)</span>
+      <span class="s3">for </span><span class="s1">epoch </span><span class="s3">in </span><span class="s1">range(epochs):</span>
+        
+        <span class="s1">m.begin_epoch()</span>
+
+        <span class="s3">for </span><span class="s1">batch </span><span class="s3">in </span><span class="s1">loader_test:</span>
+
+          <span class="s1">images = batch[</span><span class="s2">0</span><span class="s1">].to(DEVICE)</span>
+          <span class="s1">labels = batch[</span><span class="s2">1</span><span class="s1">].to(DEVICE)</span>
+          <span class="s1">preds = network(images)</span>
+          <span class="s1">m.track_num_correct_test(preds</span><span class="s3">, </span><span class="s1">labels)</span>
+
+        <span class="s3">for </span><span class="s1">batch </span><span class="s3">in </span><span class="s1">loader_train:</span>
+
+          <span class="s1">images = batch[</span><span class="s2">0</span><span class="s1">].to(DEVICE)</span>
+          <span class="s1">labels = batch[</span><span class="s2">1</span><span class="s1">].to(DEVICE)</span>
+          <span class="s1">preds = network(images)</span>
+          <span class="s1">loss = F.cross_entropy(preds</span><span class="s3">, </span><span class="s1">labels)</span>
+
+          <span class="s1">optimizer.zero_grad()</span>
+          <span class="s1">loss.backward()</span>
+          <span class="s1">optimizer.step()</span>
+
+          <span class="s1">m.track_loss(loss)</span>
+          <span class="s1">m.track_num_correct(preds</span><span class="s3">, </span><span class="s1">labels)</span>
+
+        <span class="s1">m.end_epoch()</span>
+      <span class="s1">m.end_run()</span>
+
+  <span class="s0"># when all runs are done, save results to files</span>
+  <span class="s1">m.save(output_name)</span>
+<span class="s0">#%% 
+# put all hyper params into a OrderedDict, easily expandable</span>
+<span class="s3">from </span><span class="s1">collections  </span><span class="s3">import </span><span class="s1">OrderedDict</span>
+<span class="s1">params = OrderedDict(</span>
+    <span class="s1">lr = [</span><span class="s2">.01</span><span class="s3">, </span><span class="s2">.001</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">batch_size = [</span><span class="s2">100</span><span class="s3">, </span><span class="s2">1000</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">shuffle = [</span><span class="s3">True, False</span><span class="s1">]</span>
+<span class="s1">)</span>
+<span class="s1">epochs = </span><span class="s2">3</span>
+<span class="s0">#%% md 
+</span><span class="s1">## Porównanie wartości parametrów 
+</span><span class="s0">#%% 
+</span><span class="s1">run_eval(params = params</span><span class="s3">, </span><span class="s1">model=ResNet18</span><span class="s3">, </span><span class="s1">output_name = </span><span class="s4">'ResNet18'</span><span class="s3">, </span><span class="s1">train_set = train_subset)</span>
+<span class="s0">#%% md 
+</span><span class="s1">Dla ok. 30% danych wyniki są lepsze w przypadku learning rate rownym 0.001,, niż dla 0.01. 
+Za wynik odpowiada również, czy kolejność prezentacji przykładów była zmieniana. Dla wartości True accuracy jest większa.  
+W naszym przypadku mniejsza liczba próbek podawana jednocześnie sprawdziła się lepiej. Dane wnioski sprawdzają się również na zbiorze testowym. 
+</span><span class="s0">#%% md 
+</span><span class="s1">## Porównanie ResNet18 i ResNet34 
+</span><span class="s0">#%% 
+</span><span class="s1">params = OrderedDict(</span>
+    <span class="s1">lr = [</span><span class="s2">0.001</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">batch_size = [</span><span class="s2">100</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">shuffle = [</span><span class="s3">True</span><span class="s1">]</span><span class="s3">,</span>
+<span class="s1">)</span>
+<span class="s1">epochs = </span><span class="s2">3</span>
+<span class="s0">#%% 
+</span><span class="s1">torch.cuda.memory_summary(device=</span><span class="s3">None, </span><span class="s1">abbreviated=</span><span class="s3">False</span><span class="s1">)</span>
+
+<span class="s0">#%% 
+</span><span class="s1">run_eval(params = params</span><span class="s3">, </span><span class="s1">model=ResNet34</span><span class="s3">, </span><span class="s1">output_name = </span><span class="s4">'ResNet34'</span><span class="s3">, </span><span class="s1">train_set = train_subset)</span>
+<span class="s0">#%% 
+</span><span class="s1">run_eval(params = params</span><span class="s3">, </span><span class="s1">model=ResNet18</span><span class="s3">, </span><span class="s1">output_name = </span><span class="s4">'ResNet18_2'</span><span class="s3">, </span><span class="s1">train_set = train_subset)</span>
+<span class="s0">#%% md 
+</span><span class="s1">Lepszą wartośc accuracy ma ResNet18 niż ResNet34. Dla zbioru treningowego ResNet18 ma wartośc accuracy równą 0.63, a ResNet34 przy tych samych parametrach (epoch = 3, learning_rate = 0.001, batch_size = 100) i na tym samym zbiorze ma wartość 0.55. Podobne zależności możemy zobaczyć na zbiorze testowym. 
+</span><span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">append_dropout(model</span><span class="s3">, </span><span class="s1">rate=</span><span class="s2">0.2</span><span class="s1">):</span>
+        <span class="s3">for </span><span class="s1">name</span><span class="s3">, </span><span class="s1">module </span><span class="s3">in </span><span class="s1">model.named_children():</span>
+            <span class="s3">if </span><span class="s1">len(list(module.children())) &gt; </span><span class="s2">0</span><span class="s1">:</span>
+                <span class="s1">append_dropout(module)</span>
+            <span class="s3">if </span><span class="s1">isinstance(module</span><span class="s3">, </span><span class="s1">nn.ReLU):</span>
+                <span class="s1">new = nn.Sequential(module</span><span class="s3">, </span><span class="s1">nn.Dropout2d(p=rate</span><span class="s3">, </span><span class="s1">inplace=</span><span class="s3">True</span><span class="s1">))</span>
+                <span class="s1">setattr(model</span><span class="s3">, </span><span class="s1">name</span><span class="s3">, </span><span class="s1">new)</span>
+
+
+<span class="s0">#%% 
+</span><span class="s3">def </span><span class="s1">ResNet18_dropout():</span>
+    <span class="s1">model = ResNet18()</span>
+    <span class="s1">append_dropout(model)</span>
+    <span class="s3">return </span><span class="s1">model</span>
+
+<span class="s0">#%% md 
+</span><span class="s1">Po zastosowaniu dropoutu accuracy polepiszyło się z 63% do 65%. 
+</span><span class="s0">#%% 
+</span><span class="s1">params = OrderedDict(</span>
+    <span class="s1">lr = [</span><span class="s2">0.001</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">batch_size = [</span><span class="s2">100</span><span class="s1">]</span><span class="s3">,</span>
+    <span class="s1">shuffle = [</span><span class="s3">True</span><span class="s1">]</span><span class="s3">,</span>
+<span class="s1">)</span>
+<span class="s1">epochs = </span><span class="s2">10</span>
+<span class="s0">#%% 
+</span><span class="s1">resnet18_dropout = run_eval(params=params</span><span class="s3">, </span><span class="s1">model=ResNet18_dropout</span><span class="s3">, </span><span class="s1">output_name=</span><span class="s4">'resNet18_dropout'</span><span class="s3">, </span><span class="s1">train_set = train_subset)</span>
+<span class="s0">#%% 
+</span><span class="s1">network = ResNet18_dropout()</span>
+<span class="s1">PATH = </span><span class="s4">'./cifar_net.pth'</span>
+<span class="s1">torch.save(network.state_dict()</span><span class="s3">, </span><span class="s1">PATH)</span>
+<span class="s0">#%% 
+</span><span class="s3">from </span><span class="s1">google.colab </span><span class="s3">import </span><span class="s1">drive</span>
+<span class="s1">drive.mount(</span><span class="s4">'/content/gdrive'</span><span class="s1">)</span>
+<span class="s0">#%% 
+# to export model</span>
+<span class="s1">!cp -av </span><span class="s4">'./runs/' '/content/gdrive/My Drive/temp-runs'</span>
+
+<span class="s0">#%% 
+# Load the TensorBoard notebook extension</span>
+<span class="s1">%load_ext tensorboard</span>
+<span class="s0">#%% 
+</span><span class="s1">%tensorboard --logdir runs</span>
+<span class="s0">#%% md 
+</span><span class="s1">## Macierz Konfuzji 
+</span><span class="s0">#%% 
+</span><span class="s1">network = ResNet18()</span>
+<span class="s0">#%% 
+</span><span class="s1">train_loader = torch.utils.data.DataLoader(train_subset</span><span class="s3">, </span><span class="s1">batch_size = </span><span class="s2">4</span><span class="s3">, </span><span class="s1">shuffle=</span><span class="s3">True</span><span class="s1">)</span>
+<span class="s1">test_loader = torch.utils.data.DataLoader(test_set</span><span class="s3">, </span><span class="s1">batch_size=</span><span class="s2">4</span><span class="s3">, </span><span class="s1">shuffle=</span><span class="s3">False</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s1">batch = next(iter(train_loader))</span>
+
+<span class="s1">images</span><span class="s3">, </span><span class="s1">labels = batch</span>
+
+<span class="s1">print(images.shape)</span>
+<span class="s1">print(labels.shape)</span>
+<span class="s1">grid = torchvision.utils.make_grid(images</span><span class="s3">, </span><span class="s1">nrow=</span><span class="s2">10</span><span class="s1">)</span>
+
+<span class="s1">plt.figure(figsize=(</span><span class="s2">15</span><span class="s3">,</span><span class="s2">15</span><span class="s1">))</span>
+<span class="s1">plt.imshow(grid.permute(</span><span class="s2">1</span><span class="s3">,</span><span class="s2">2</span><span class="s3">,</span><span class="s2">0</span><span class="s1">))</span>
+
+<span class="s1">print(</span><span class="s4">'labels:'</span><span class="s3">, </span><span class="s1">labels)</span>
+<span class="s0">#%% 
+</span><span class="s1">torch.cuda.empty_cache()</span>
+<span class="s0">#%% 
+</span><span class="s1">@torch.no_grad()</span>
+<span class="s3">def </span><span class="s1">get_all_preds(model</span><span class="s3">, </span><span class="s1">loader):</span>
+  <span class="s1">all_preds = torch.tensor([])</span>
+  <span class="s3">for </span><span class="s1">batch </span><span class="s3">in </span><span class="s1">loader:</span>
+    <span class="s1">images</span><span class="s3">, </span><span class="s1">labels = batch</span>
+
+    <span class="s1">preds = model(images)</span>
+    <span class="s1">all_preds = torch.cat((all_preds</span><span class="s3">, </span><span class="s1">preds) </span><span class="s3">,</span><span class="s1">dim=</span><span class="s2">0</span><span class="s1">)</span>
+
+  <span class="s3">return </span><span class="s1">all_preds</span>
+<span class="s1">test_loader = torch.utils.data.DataLoader(test_set</span><span class="s3">, </span><span class="s1">batch_size = </span><span class="s2">1000</span><span class="s3">,</span><span class="s1">num_workers=</span><span class="s2">2</span><span class="s1">)</span>
+<span class="s1">test_preds = get_all_preds(network</span><span class="s3">, </span><span class="s1">test_loader)</span>
+<span class="s1">actual_labels = torch.Tensor(test_set.targets)</span>
+<span class="s1">preds_correct = test_preds.argmax(dim=</span><span class="s2">1</span><span class="s1">).eq(actual_labels).sum().item()</span>
+
+<span class="s1">print(</span><span class="s4">'total correct:'</span><span class="s3">, </span><span class="s1">preds_correct)</span>
+<span class="s1">print(</span><span class="s4">'accuracy:'</span><span class="s3">, </span><span class="s1">preds_correct / len(test_set))</span>
+<span class="s0">#%% 
+</span><span class="s3">import </span><span class="s1">itertools</span>
+<span class="s3">import </span><span class="s1">numpy </span><span class="s3">as </span><span class="s1">np</span>
+<span class="s3">import </span><span class="s1">matplotlib.pyplot </span><span class="s3">as </span><span class="s1">plt</span>
+<span class="s3">from </span><span class="s1">sklearn.metrics </span><span class="s3">import </span><span class="s1">confusion_matrix</span>
+
+<span class="s3">def </span><span class="s1">plot_confusion_matrix(cm</span><span class="s3">, </span><span class="s1">classes</span><span class="s3">,</span>
+                          <span class="s1">title=</span><span class="s4">'Confusion matrix'</span><span class="s3">,</span>
+                          <span class="s1">cmap=plt.cm.Blues):</span>
+    <span class="s5">&quot;&quot;&quot; 
+    This function prints and plots the confusion matrix. 
+    Normalization can be applied by setting `normalize=True`. 
+    &quot;&quot;&quot;</span>
+    <span class="s1">cm = cm.astype(</span><span class="s4">'float'</span><span class="s1">) / cm.sum(axis=</span><span class="s2">1</span><span class="s1">)[:</span><span class="s3">, </span><span class="s1">np.newaxis]</span>
+    <span class="s1">plt.imshow(cm</span><span class="s3">, </span><span class="s1">interpolation=</span><span class="s4">'nearest'</span><span class="s3">, </span><span class="s1">cmap=cmap)</span>
+    <span class="s1">plt.title(title)</span>
+    <span class="s1">plt.colorbar()</span>
+    <span class="s1">tick_marks = np.arange(len(classes))</span>
+    <span class="s1">plt.xticks(tick_marks</span><span class="s3">, </span><span class="s1">classes</span><span class="s3">, </span><span class="s1">rotation=</span><span class="s2">45</span><span class="s1">)</span>
+    <span class="s1">plt.yticks(tick_marks</span><span class="s3">, </span><span class="s1">classes)</span>
+
+    <span class="s1">fmt = </span><span class="s4">'.2f'</span>
+    <span class="s1">thresh = cm.max() / </span><span class="s2">2.</span>
+    <span class="s3">for </span><span class="s1">i</span><span class="s3">, </span><span class="s1">j </span><span class="s3">in </span><span class="s1">itertools.product(range(cm.shape[</span><span class="s2">0</span><span class="s1">])</span><span class="s3">, </span><span class="s1">range(cm.shape[</span><span class="s2">1</span><span class="s1">])):</span>
+        <span class="s1">plt.text(j</span><span class="s3">, </span><span class="s1">i</span><span class="s3">, </span><span class="s1">format(cm[i</span><span class="s3">, </span><span class="s1">j]</span><span class="s3">, </span><span class="s1">fmt)</span><span class="s3">,</span>
+                 <span class="s1">horizontalalignment=</span><span class="s4">&quot;center&quot;</span><span class="s3">,</span>
+                 <span class="s1">color=</span><span class="s4">&quot;white&quot; </span><span class="s3">if </span><span class="s1">cm[i</span><span class="s3">, </span><span class="s1">j] &gt; thresh </span><span class="s3">else </span><span class="s4">&quot;black&quot;</span><span class="s1">)</span>
+
+    <span class="s1">plt.tight_layout()</span>
+    <span class="s1">plt.ylabel(</span><span class="s4">'True label'</span><span class="s1">)</span>
+    <span class="s1">plt.xlabel(</span><span class="s4">'Predicted label'</span><span class="s1">)</span>
+
+<span class="s1">cm = confusion_matrix(test_set.targets</span><span class="s3">, </span><span class="s1">test_preds.argmax(dim=</span><span class="s2">1</span><span class="s1">))</span>
+<span class="s1">classes = train_set.classes</span>
+<span class="s1">plt.figure(figsize=(</span><span class="s2">10</span><span class="s3">,</span><span class="s2">10</span><span class="s1">))</span>
+<span class="s1">plot_confusion_matrix(cm</span><span class="s3">, </span><span class="s1">classes</span><span class="s3">,</span><span class="s1">title=</span><span class="s4">'Confusion matrix on test set'</span><span class="s1">)</span>
+<span class="s0">#%% md 
+</span><span class="s1">Z macierzy konfuzji możemy zobaczyć co jest najczęsciej mylone. Widzimy np, że występują częste pomyłki w rozróżnieniu kota i psa. 
+</span><span class="s0">#%% 
+</span><span class="s1">k = </span><span class="s2">0</span>
+<span class="s3">for </span><span class="s1">i </span><span class="s3">in </span><span class="s1">range(len(train_subset)):</span>
+  <span class="s3">if </span><span class="s1">y_train[i] != np.asarray(test_preds.argmax(dim=</span><span class="s2">1</span><span class="s1">))[i] :</span>
+    <span class="s1">print(</span><span class="s4">f'</span><span class="s3">{</span><span class="s1">train_set.classes[y_train[i]]</span><span class="s3">} </span><span class="s4">został pomylony z </span><span class="s3">{</span><span class="s1">train_set.classes[np.asarray(test_preds.argmax(dim=</span><span class="s2">1</span><span class="s1">))[i]]</span><span class="s3">}</span><span class="s4">'</span><span class="s1">)  </span>
+    <span class="s1">img</span><span class="s3">, </span><span class="s1">label = train_subset[i]</span>
+    <span class="s1">plt.title(</span><span class="s4">'Mistake'</span><span class="s1">)</span>
+    <span class="s1">plt.axis(</span><span class="s4">&quot;off&quot;</span><span class="s1">)</span>
+    <span class="s1">plt.imshow(img.cpu().permute(</span><span class="s2">1</span><span class="s3">, </span><span class="s2">2</span><span class="s3">, </span><span class="s2">0</span><span class="s1">))</span>
+    <span class="s1">plt.show()</span>
+    <span class="s1">k += </span><span class="s2">1</span>
+  <span class="s3">if </span><span class="s1">k &gt; </span><span class="s2">10</span><span class="s1">:</span>
+    <span class="s3">break</span>
+<span class="s0">#%% 
+</span><span class="s1">@torch.no_grad()</span>
+<span class="s3">def </span><span class="s1">get_all_preds(model</span><span class="s3">, </span><span class="s1">loader):</span>
+  <span class="s1">all_preds = torch.tensor([])</span>
+  <span class="s3">for </span><span class="s1">batch </span><span class="s3">in </span><span class="s1">loader:</span>
+    <span class="s1">images</span><span class="s3">, </span><span class="s1">labels = batch</span>
+
+    <span class="s1">preds = model(images)</span>
+    <span class="s1">all_preds = torch.cat((all_preds</span><span class="s3">, </span><span class="s1">preds) </span><span class="s3">,</span><span class="s1">dim=</span><span class="s2">0</span><span class="s1">)</span>
+
+  <span class="s3">return </span><span class="s1">all_preds</span>
+<span class="s1">test_loader_small = torch.utils.data.DataLoader(test_set</span><span class="s3">, </span><span class="s1">batch_size = </span><span class="s2">100</span><span class="s3">,</span><span class="s1">num_workers=</span><span class="s2">2</span><span class="s1">)</span>
+<span class="s1">test_preds = get_all_preds(network</span><span class="s3">, </span><span class="s1">test_loader_small)</span>
+<span class="s0">#%% 
+</span><span class="s3">import </span><span class="s1">os</span>
+
+<span class="s1">weights_path = </span><span class="s4">'v5-weights.81-0.3749.hdf5'</span>
+<span class="s1">out_dir = </span><span class="s4">'v5-features'</span>
+
+<span class="s3">if not </span><span class="s1">os.path.exists(out_dir):</span>
+    <span class="s1">os.makedirs(out_dir)</span>
+<span class="s0">#%% 
+</span><span class="s3">from </span><span class="s1">sklearn.decomposition </span><span class="s3">import </span><span class="s1">PCA</span>
+
+<span class="s1">pca = PCA(n_components=</span><span class="s2">2</span><span class="s1">)</span>
+<span class="s1">pca.fit(test_preds)</span>
+<span class="s1">pca_features = pca.transform(test_preds)</span>
+
+<span class="s1">np.save(os.path.join(out_dir</span><span class="s3">, </span><span class="s4">'fc1_features_pca_2dim.npy'</span><span class="s1">)</span><span class="s3">, </span><span class="s1">pca_features)</span>
+<span class="s0">#%% 
+</span><span class="s1">tx</span><span class="s3">, </span><span class="s1">ty = pca_features[:</span><span class="s3">,</span><span class="s2">0</span><span class="s1">]</span><span class="s3">, </span><span class="s1">pca_features[:</span><span class="s3">,</span><span class="s2">1</span><span class="s1">]</span>
+<span class="s1">tx = (tx-np.min(tx)) / (np.max(tx) - np.min(tx))</span>
+<span class="s1">ty = (ty-np.min(ty)) / (np.max(ty) - np.min(ty))</span>
+<span class="s0">#%% 
+</span><span class="s3">import </span><span class="s1">matplotlib.pyplot </span><span class="s3">as </span><span class="s1">plt</span>
+<span class="s3">from </span><span class="s1">PIL </span><span class="s3">import </span><span class="s1">Image</span>
+
+<span class="s1">width = </span><span class="s2">4000</span>
+<span class="s1">height = </span><span class="s2">3000</span>
+<span class="s1">max_dim = </span><span class="s2">100</span>
+
+<span class="s1">full_image = Image.new(</span><span class="s4">'RGB'</span><span class="s3">, </span><span class="s1">(width</span><span class="s3">, </span><span class="s1">height))</span>
+<span class="s3">for </span><span class="s1">idx</span><span class="s3">, </span><span class="s1">x </span><span class="s3">in </span><span class="s1">enumerate(test_set.data):</span>
+    <span class="s1">tile = Image.fromarray(np.uint8(x * </span><span class="s2">255</span><span class="s1">))</span>
+    <span class="s0">#tile = Image.open(img)</span>
+    <span class="s1">rs = max(</span><span class="s2">1</span><span class="s3">, </span><span class="s1">tile.width/max_dim</span><span class="s3">, </span><span class="s1">tile.height/max_dim)</span>
+    <span class="s1">tile = tile.resize((int(tile.width/rs)</span><span class="s3">, </span><span class="s1">int(tile.height/rs))</span><span class="s3">, </span><span class="s1">Image.ANTIALIAS)</span>
+    <span class="s1">full_image.paste(tile</span><span class="s3">, </span><span class="s1">(int((width-max_dim) * tx[idx])</span><span class="s3">, </span><span class="s1">int((height-max_dim) * ty[idx])))</span>
+
+<span class="s1">%matplotlib inline</span>
+<span class="s1">plt.figure(figsize = (</span><span class="s2">16</span><span class="s3">,</span><span class="s2">12</span><span class="s1">))</span>
+<span class="s1">plt.imshow(full_image)</span>
+<span class="s0">#%% 
+</span><span class="s1">full_image.save(os.path.join(out_dir</span><span class="s3">, </span><span class="s4">&quot;fc1_pca.jpg&quot;</span><span class="s1">))</span>
+
+<span class="s0">#%% 
+</span><span class="s3">from </span><span class="s1">sklearn.manifold </span><span class="s3">import </span><span class="s1">TSNE</span>
+
+<span class="s1">tsne = TSNE().fit_transform(pca_features)</span>
+<span class="s1">np.save(os.path.join(out_dir</span><span class="s3">, </span><span class="s4">'fc1_features_tsne_default.npy'</span><span class="s1">)</span><span class="s3">, </span><span class="s1">tsne)</span>
+<span class="s0">#%% 
+</span><span class="s1">tx</span><span class="s3">, </span><span class="s1">ty = tsne[:</span><span class="s3">,</span><span class="s2">0</span><span class="s1">]</span><span class="s3">, </span><span class="s1">tsne[:</span><span class="s3">,</span><span class="s2">1</span><span class="s1">]</span>
+<span class="s1">tx = (tx-np.min(tx)) / (np.max(tx) - np.min(tx))</span>
+<span class="s1">ty = (ty-np.min(ty)) / (np.max(ty) - np.min(ty))</span>
+<span class="s0">#%% 
+</span><span class="s3">import </span><span class="s1">matplotlib.pyplot </span><span class="s3">as </span><span class="s1">plt</span>
+<span class="s3">from </span><span class="s1">PIL </span><span class="s3">import </span><span class="s1">Image</span>
+
+<span class="s1">width = </span><span class="s2">4000</span>
+<span class="s1">height = </span><span class="s2">3000</span>
+<span class="s1">max_dim = </span><span class="s2">100</span>
+
+<span class="s1">full_image = Image.new(</span><span class="s4">'RGB'</span><span class="s3">, </span><span class="s1">(width</span><span class="s3">, </span><span class="s1">height))</span>
+<span class="s3">for </span><span class="s1">idx</span><span class="s3">, </span><span class="s1">x </span><span class="s3">in </span><span class="s1">enumerate(test_set.data):</span>
+    <span class="s1">tile = Image.fromarray(np.uint8(x * </span><span class="s2">255</span><span class="s1">))</span>
+    <span class="s0">#tile = Image.open(img)</span>
+    <span class="s1">rs = max(</span><span class="s2">1</span><span class="s3">, </span><span class="s1">tile.width / max_dim</span><span class="s3">, </span><span class="s1">tile.height / max_dim)</span>
+    <span class="s1">tile = tile.resize((int(tile.width / rs)</span><span class="s3">,</span>
+                        <span class="s1">int(tile.height / rs))</span><span class="s3">,</span>
+                       <span class="s1">Image.ANTIALIAS)</span>
+    <span class="s1">full_image.paste(tile</span><span class="s3">, </span><span class="s1">(int((width-max_dim) * tx[idx])</span><span class="s3">,</span>
+                            <span class="s1">int((height-max_dim) * ty[idx])))</span>
+
+<span class="s1">%matplotlib inline</span>
+<span class="s1">plt.figure(figsize = (</span><span class="s2">16</span><span class="s3">,</span><span class="s2">12</span><span class="s1">))</span>
+<span class="s1">plt.imshow(full_image)</span>
+<span class="s0">#%% 
+</span><span class="s1">full_image.save(os.path.join(out_dir</span><span class="s3">, </span><span class="s4">&quot;fc1_features_tsne_default.jpg&quot;</span><span class="s1">))</span>
+
+<span class="s0">#%% 
+</span><span class="s3">from </span><span class="s1">keras.datasets </span><span class="s3">import </span><span class="s1">cifar10</span>
+
+<span class="s0"># have to re-load cifar to get y_test back in its original form</span>
+<span class="s1">_</span><span class="s3">, </span><span class="s1">(x_test</span><span class="s3">, </span><span class="s1">y_test) = cifar10.load_data()</span>
+
+<span class="s1">y_test = np.asarray(y_test)</span>
+<span class="s0">#%% 
+</span><span class="s1">plt.figure(figsize = (</span><span class="s2">16</span><span class="s3">,</span><span class="s2">12</span><span class="s1">))</span>
+
+<span class="s1">classes = [</span><span class="s4">'airplane'</span><span class="s3">, </span><span class="s4">'automobile'</span><span class="s3">, </span><span class="s4">'bird'</span><span class="s3">, </span><span class="s4">'cat'</span><span class="s3">, </span><span class="s4">'deer'</span><span class="s3">, </span><span class="s4">'dog'</span><span class="s3">, </span><span class="s4">'frog'</span><span class="s3">, </span><span class="s4">'horse'</span><span class="s3">, </span><span class="s4">'ship'</span><span class="s3">, </span><span class="s4">'truck'</span><span class="s1">]</span>
+<span class="s3">for </span><span class="s1">i </span><span class="s3">in </span><span class="s1">range(len(classes)):</span>
+    <span class="s1">y_i = y_test == i</span>
+    <span class="s1">plt.scatter(tx[y_i[:</span><span class="s3">, </span><span class="s2">0</span><span class="s1">]]</span><span class="s3">, </span><span class="s1">ty[y_i[:</span><span class="s3">, </span><span class="s2">0</span><span class="s1">]]</span><span class="s3">, </span><span class="s1">label=classes[i])</span>
+<span class="s1">plt.legend(loc=</span><span class="s2">4</span><span class="s1">)</span>
+<span class="s1">plt.gca().invert_yaxis()</span>
+<span class="s1">plt.savefig(os.path.join(out_dir</span><span class="s3">, </span><span class="s4">&quot;fc1_features_tsne_default_pts.jpg&quot;</span><span class="s1">)</span><span class="s3">, </span><span class="s1">bbox_inches=</span><span class="s4">'tight'</span><span class="s1">)</span>
+<span class="s1">plt.show()</span></pre>
+</body>
+</html>
