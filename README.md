@@ -6,9 +6,7 @@ Semestr Wiosenny 2021/22 [@hbaniecki](https://github.com/hbaniecki)
 
 Kontekst: [Knowing What and Why? — Explaining Image Classifier Predictions](https://towardsdatascience.com/knowing-what-and-why-explaining-image-classifier-predictions-680a15043bad)
 
-Projekty:
-1. Klasyfikacja obrazu i kreatywne wyjaśnianie zagadnień opisanych w pracy [Kandinsky Patterns](https://www.sciencedirect.com/science/article/pii/S0004370221000977)
-2. Zostanie podany na zajęciach
+Projekt: Klasyfikacja obrazu i kreatywne wyjaśnianie zagadnień opisanych w pracy [Kandinsky Patterns](https://www.sciencedirect.com/science/article/pii/S0004370221000977).
 
 Materiały:
 1. [Neural networks by 3Blue1Brown](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi); [Neural Network Playground](https://playground.tensorflow.org)
@@ -100,7 +98,7 @@ Literatura:
   <tr>
     <td>8</td>
     <td>04-14</td>
-    <td>Przegląd danych związanych z projektem.</td>
+    <td>Przegląd danych i modeli związanych z projektem.</td>
     <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd3" target="_blank">PD-3 oddanie</a></td>
   </tr>
   <tr>
@@ -112,37 +110,37 @@ Literatura:
   <tr>
     <td>10</td>
     <td>04-28</td>
-    <td>Przegląd modeli związanych z projektem.</td>
+    <td>Przegląd wyjaśnień związanych z projektem i struktury artykułu.</td>
     <td></td>
   </tr>
   <tr>
     <td>11</td>
-    <td>05-05</td>
+    <td>05-<b>05</b></td>
     <td>Przedstawienie postępów projektów, konsultacje.</td>
     <td>KM-2 oddanie,<br>KM-3 start</td>
   </tr>
   <tr>
     <td>12</td>
-    <td>05-19</td>
-    <td>Przegląd wyjaśnień związanych z projektem.</td>
-    <td>
+    <td>05-<b>19</b></td>
+    <td>Przedstawienie postępów projektów, konsultacje.</td>
+    <td>KM-3 oddanie</td>
   </tr>
   <tr>
     <td>13</td>
     <td>05-26</td>
-    <td>Przedstawienie postępów projektów, konsultacje.</td>
-    <td>KM-3 oddanie,<br>Prezentacja</td>
+    <td>Przedstawienie i dyskusja wyników projektu na zajęciach.</td>
+    <td>Prezentacja</td>
   </tr>
   <tr>
     <td>14</td>
     <td>06-02</td>
-    <td>*Manipulowanie wyjaśnieniami sieci neuronowych.</td>
+    <td>*Wykład: Manipulowanie wyjaśnieniami sieci neuronowych.</td>
     <td>Raport</td>
   </tr>
   <tr>
     <td>15</td>
     <td>06-09</td>
-    <td>Podsumowanie projektu.</td>
+    <td>Podsumowanie zajęć laboratoryjnych i projektowych.</td>
     <td></td>
   </tr>
 </tbody>
@@ -152,7 +150,7 @@ Literatura:
 
 Warszataty Badawcze składają się z wykładu, zajęć laboratoryjnych i projektowych:
 
--   praca podczas projektu -- 6 x 8 pkt = 48 pkt.
+-   praca podczas laboratoriów i projektu -- 6 x 8 pkt = 48 pkt.
 -   prezentacja końcowa na wykładzie -- 16 pkt. (deadline: 29 maja)
 -   raport końcowy -- 32 pkt. (deadline: 3 czerwca)
 -   stosowanie dobrych praktyk wykorzystania GitHub -- 4 pkt.
