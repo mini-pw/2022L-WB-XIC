@@ -92,7 +92,7 @@ Literatura:
     <td>7</td>
     <td>04-07</td>
     <td>Wyjaśnienia konwolucyjnych sieci neuronowych w praktyce.</td>
-    <td>KM-1 start</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-1 start</a></td>
   </tr>
 	<tr><td colspan="4"></td></tr>
   <tr>
@@ -105,7 +105,7 @@ Literatura:
     <td>9</td>
     <td>04-21</td>
     <td>Przedstawienie postępów projektów, konsultacje.</td>
-    <td>KM-1 oddanie,<br>KM-2 start</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-1 oddanie</a>,<br><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-2 start</a></td>
   </tr>
   <tr>
     <td>10</td>
@@ -117,13 +117,13 @@ Literatura:
     <td>11</td>
     <td>05-<b>05</b></td>
     <td>Przedstawienie postępów projektów, konsultacje.</td>
-    <td>KM-2 oddanie,<br>KM-3 start</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-2 oddanie</a>,<br><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-3 start</a></td>
   </tr>
   <tr>
     <td>12</td>
     <td>05-<b>19</b></td>
     <td>Przedstawienie postępów projektów, konsultacje.</td>
-    <td>KM-3 oddanie</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-3 oddanie</a></td>
   </tr>
   <tr>
     <td>13</td>
@@ -134,7 +134,7 @@ Literatura:
   <tr>
     <td>14</td>
     <td>06-02</td>
-    <td>*Wykład: Manipulowanie wyjaśnieniami sieci neuronowych.</td>
+    <td>*Prezentacja: Manipulowanie wyjaśnieniami sieci neuronowych.</td>
     <td>Raport</td>
   </tr>
   <tr>
