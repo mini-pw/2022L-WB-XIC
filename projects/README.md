@@ -55,3 +55,7 @@ Postępy, raporty zgłaszamy poprzez PR o tytule `[KM{#N}] Nazwisko1 Nazwisko2 N
 - Generator https://github.com/human-centered-ai-lab/app-kandinsky-pattern-generator
 - Artykuł KP https://doi.org/10.1016/j.artint.2021.103546
 - Holzinger et al. **KANDINSKY Patterns as IQ-Test for Machine Learning**. CD-MAKE, 2019. https://link.springer.com/chapter/10.1007/978-3-030-29726-8_1
+
+## Attribution
+
+The attached image has been designed using resources from https://www.flaticon.com.
