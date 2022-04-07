@@ -134,7 +134,7 @@ Literatura:
   <tr>
     <td>14</td>
     <td>06-02</td>
-    <td>*Prezentacja: [Manipulowanie wyjaśnieniami sieci neuronowych.](https://github.com/hbaniecki/talks/blob/main/2021/mlinpl_manipulating.pdf)</td>
+    <td>*Prezentacja: <a href="https://github.com/hbaniecki/talks/blob/main/2021/mlinpl_manipulating.pdf" target="_blank">Manipulowanie wyjaśnieniami sieci neuronowych.</a></td>
     <td>Raport</td>
   </tr>
   <tr>
