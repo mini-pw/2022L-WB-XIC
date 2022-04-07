@@ -84,14 +84,14 @@ Literatura:
   <tr>
     <td>6</td>
     <td>03-31</td>
-    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab5" target="_blank">Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (SHAP, IG etc.).</a></td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab5" target="_blank">Wstęp do wyjaśnień konwolucyjnych sieci neuronowych (LIME, IG etc.).</a></td>
 	  <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd2" target="_blank">PD-2 oddanie</a>,
 		  <br><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/homeworks/pd3" target="_blank">PD-3 start</a></td>
   </tr>
   <tr>
     <td>7</td>
     <td>04-07</td>
-    <td>Wyjaśnienia konwolucyjnych sieci neuronowych w praktyce.</td>
+    <td>Wyjaśnienia konwolucyjnych sieci neuronowych c.d. (SHAP, TCAV etc.).</td>
     <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/projects" target="_blank">KM-1 start</a></td>
   </tr>
 	<tr><td colspan="4"></td></tr>
@@ -134,7 +134,7 @@ Literatura:
   <tr>
     <td>14</td>
     <td>06-02</td>
-    <td>*Prezentacja: Manipulowanie wyjaśnieniami sieci neuronowych.</td>
+    <td>*Prezentacja: [Manipulowanie wyjaśnieniami sieci neuronowych.](https://github.com/hbaniecki/talks/blob/main/2021/mlinpl_manipulating.pdf)</td>
     <td>Raport</td>
   </tr>
   <tr>

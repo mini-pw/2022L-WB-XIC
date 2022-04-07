@@ -48,9 +48,10 @@ Podstawowy plan projektu zakłada wytrenowanie modeli klasyfikacyjnych na wybran
 
 Postępy, raporty zgłaszamy poprzez PR o tytule `[KM{#N}] Nazwisko1 Nazwisko2 Nazwisko3` do folderu `projects/nazwisko1_nazwisko2_nazwisko3/km{#N}`, gdzie w miejsce `{#N}` wstawiamy 1, 2, lub 3. Omawiane są w powyższych dniach na indywidualnych konsultacjach z zespołem.
 
-## Przydatne linki
+## Przydatne materiały
+- Wyjaśnienia oparte na konceptach https://christophm.github.io/interpretable-ml-book/detecting-concepts.html; https://arxiv.org/abs/1711.11279; https://arxiv.org/abs/1902.03129
+- Globalne wyjaśnienia https://arxiv.org/abs/1312.6034; https://arxiv.org/abs/1602.03616
 - Dane (wyzwania) https://github.com/human-centered-ai-lab/dat-kandinsky-patterns
 - Generator https://github.com/human-centered-ai-lab/app-kandinsky-pattern-generator
-- Artykuł https://doi.org/10.1016/j.artint.2021.103546
-- Wyjaśnienia oparte na konceptach https://christophm.github.io/interpretable-ml-book/detecting-concepts.html; https://arxiv.org/abs/1711.11279; https://arxiv.org/abs/1902.03129
+- Artykuł KP https://doi.org/10.1016/j.artint.2021.103546
 - Holzinger et al. **KANDINSKY Patterns as IQ-Test for Machine Learning**. CD-MAKE, 2019. https://link.springer.com/chapter/10.1007/978-3-030-29726-8_1
