@@ -1,0 +1,1 @@
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/MI2-Education/2022L-WB-XIC/blob/master/labs/lab6/code.ipynb)
