@@ -1,0 +1,393 @@
+<html>
+<head>
+<title>zuzanna_glinka.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #808080;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #cc7832;}
+.s3 { color: #6a8759;}
+.s4 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+zuzanna_glinka.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% md 
+</span><span class="s1">#Praca domowa 3 
+</span><span class="s0">#%% md 
+</span><span class="s1">###Inastalacja pakietów 
+</span><span class="s0">#%% 
+</span><span class="s1">!pip install shap captum torchinfo</span>
+<span class="s1">!pip install timm</span>
+<span class="s0">#%% md 
+</span><span class="s1">###Importowanie pakietów 
+</span><span class="s0">#%% 
+</span><span class="s2">import </span><span class="s1">numpy </span><span class="s2">as </span><span class="s1">np </span>
+<span class="s2">import </span><span class="s1">pandas </span><span class="s2">as </span><span class="s1">pd </span>
+<span class="s2">import </span><span class="s1">os</span>
+<span class="s2">import </span><span class="s1">shap</span>
+<span class="s0">#%% 
+</span><span class="s2">import </span><span class="s1">torch</span>
+<span class="s2">import </span><span class="s1">torchvision</span>
+<span class="s2">from </span><span class="s1">torchvision </span><span class="s2">import </span><span class="s1">datasets</span>
+<span class="s2">from </span><span class="s1">torchvision </span><span class="s2">import </span><span class="s1">transforms </span><span class="s2">as </span><span class="s1">T </span>
+<span class="s2">from </span><span class="s1">torch </span><span class="s2">import </span><span class="s1">nn</span><span class="s2">, </span><span class="s1">optim</span>
+<span class="s2">from </span><span class="s1">torch.nn </span><span class="s2">import </span><span class="s1">functional </span><span class="s2">as </span><span class="s1">F</span>
+<span class="s2">from </span><span class="s1">torch.utils.data </span><span class="s2">import </span><span class="s1">DataLoader</span><span class="s2">, </span><span class="s1">sampler</span><span class="s2">, </span><span class="s1">random_split</span>
+<span class="s2">from </span><span class="s1">torchvision </span><span class="s2">import </span><span class="s1">models</span>
+<span class="s0">#%% 
+</span><span class="s2">import </span><span class="s1">timm</span>
+<span class="s2">from </span><span class="s1">timm.loss </span><span class="s2">import </span><span class="s1">LabelSmoothingCrossEntropy </span>
+<span class="s2">from </span><span class="s1">captum.attr </span><span class="s2">import </span><span class="s1">Lime</span>
+<span class="s2">from </span><span class="s1">skimage </span><span class="s2">import </span><span class="s1">segmentation</span>
+<span class="s2">from </span><span class="s1">captum.attr </span><span class="s2">import </span><span class="s1">IntegratedGradients</span>
+<span class="s2">from </span><span class="s1">captum.attr </span><span class="s2">import </span><span class="s1">KernelShap</span>
+
+<span class="s0">#%% 
+# remove warnings</span>
+<span class="s2">import </span><span class="s1">warnings</span>
+<span class="s1">warnings.filterwarnings(</span><span class="s3">&quot;ignore&quot;</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s2">import </span><span class="s1">matplotlib.pyplot </span><span class="s2">as </span><span class="s1">plt</span>
+<span class="s1">%matplotlib inline</span>
+<span class="s0">#%% 
+</span><span class="s2">import </span><span class="s1">sys</span>
+<span class="s2">from </span><span class="s1">tqdm </span><span class="s2">import </span><span class="s1">tqdm</span>
+<span class="s2">import </span><span class="s1">time</span>
+<span class="s2">import </span><span class="s1">copy</span>
+<span class="s0">#%% md 
+</span><span class="s1">Funkcja  
+</span><span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">get_classes(data_dir):</span>
+    <span class="s1">all_data = datasets.ImageFolder(data_dir)</span>
+    <span class="s2">return </span><span class="s1">all_data.classes</span>
+<span class="s0">#%% md 
+</span><span class="s1">Funkcja zwracająca loader i zbiór danych. Na wejściu funkcji podajemy ścieżkę do pliku oraz rozmiar batchów. 
+</span><span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">get_data_loaders(data_dir</span><span class="s2">, </span><span class="s1">batch_size</span><span class="s2">, </span><span class="s1">train = </span><span class="s2">False</span><span class="s1">):</span>
+    <span class="s2">if </span><span class="s1">train:</span>
+        <span class="s0">#train</span>
+        <span class="s1">transform = T.Compose([</span>
+            <span class="s1">T.RandomHorizontalFlip()</span><span class="s2">,</span>
+            <span class="s1">T.RandomVerticalFlip()</span><span class="s2">,</span>
+            <span class="s1">T.RandomApply(torch.nn.ModuleList([T.ColorJitter()])</span><span class="s2">, </span><span class="s1">p=</span><span class="s4">0.25</span><span class="s1">)</span><span class="s2">,</span>
+            <span class="s1">T.Resize(</span><span class="s4">256</span><span class="s1">)</span><span class="s2">,</span>
+            <span class="s1">T.CenterCrop(</span><span class="s4">224</span><span class="s1">)</span><span class="s2">,</span>
+            <span class="s1">T.ToTensor()</span><span class="s2">,</span>
+            <span class="s1">T.Normalize(timm.data.IMAGENET_DEFAULT_MEAN</span><span class="s2">, </span><span class="s1">timm.data.IMAGENET_DEFAULT_STD)</span><span class="s2">, </span><span class="s0"># imagenet means</span>
+            <span class="s1">T.RandomErasing(p=</span><span class="s4">0.1</span><span class="s2">, </span><span class="s1">value=</span><span class="s3">'random'</span><span class="s1">)</span>
+        <span class="s1">])</span>
+        <span class="s1">train_data = datasets.ImageFolder(os.path.join(data_dir</span><span class="s2">, </span><span class="s3">&quot;train/&quot;</span><span class="s1">)</span><span class="s2">, </span><span class="s1">transform=transform)</span>
+        <span class="s1">train_loader = DataLoader(train_data</span><span class="s2">, </span><span class="s1">batch_size=batch_size</span><span class="s2">, </span><span class="s1">shuffle=</span><span class="s2">True, </span><span class="s1">num_workers=</span><span class="s4">4</span><span class="s1">)</span>
+        <span class="s2">return </span><span class="s1">train_loader</span><span class="s2">, </span><span class="s1">train_data</span>
+    <span class="s2">else</span><span class="s1">:</span>
+        <span class="s0"># val/test</span>
+        <span class="s1">transform = T.Compose([ </span><span class="s0"># We dont need augmentation for test transforms</span>
+            <span class="s1">T.Resize(</span><span class="s4">256</span><span class="s1">)</span><span class="s2">,</span>
+            <span class="s1">T.CenterCrop(</span><span class="s4">224</span><span class="s1">)</span><span class="s2">,</span>
+            <span class="s1">T.ToTensor()</span><span class="s2">,</span>
+            <span class="s1">T.Normalize(timm.data.IMAGENET_DEFAULT_MEAN</span><span class="s2">, </span><span class="s1">timm.data.IMAGENET_DEFAULT_STD)</span><span class="s2">, </span><span class="s0"># imagenet means</span>
+        <span class="s1">])</span>
+        <span class="s1">val_data = datasets.ImageFolder(os.path.join(data_dir</span><span class="s2">, </span><span class="s3">&quot;valid/&quot;</span><span class="s1">)</span><span class="s2">, </span><span class="s1">transform=transform)</span>
+        <span class="s1">test_data = datasets.ImageFolder(os.path.join(data_dir</span><span class="s2">, </span><span class="s3">&quot;test/&quot;</span><span class="s1">)</span><span class="s2">, </span><span class="s1">transform=transform)</span>
+        <span class="s1">val_loader = DataLoader(val_data</span><span class="s2">, </span><span class="s1">batch_size=batch_size</span><span class="s2">, </span><span class="s1">shuffle=</span><span class="s2">True, </span><span class="s1">num_workers=</span><span class="s4">4</span><span class="s1">)</span>
+        <span class="s1">test_loader = DataLoader(test_data</span><span class="s2">, </span><span class="s1">batch_size=batch_size</span><span class="s2">, </span><span class="s1">shuffle=</span><span class="s2">True, </span><span class="s1">num_workers=</span><span class="s4">4</span><span class="s1">)</span>
+        <span class="s2">return </span><span class="s1">val_loader</span><span class="s2">, </span><span class="s1">test_loader</span><span class="s2">, </span><span class="s1">val_data</span><span class="s2">, </span><span class="s1">test_data</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Zbiór danych Butterfly species 
+</span><span class="s0">#%% md 
+</span><span class="s1">Pliki pobierane są z dysku Google. 
+</span><span class="s0">#%% 
+</span><span class="s1">dataset_path = </span><span class="s3">&quot;gdrive/MyDrive/butterfly-images40-species&quot;</span>
+<span class="s0">#%% 
+</span><span class="s2">from </span><span class="s1">google.colab </span><span class="s2">import </span><span class="s1">drive</span>
+<span class="s1">drive.mount(</span><span class="s3">'/content/gdrive'</span><span class="s1">)</span>
+<span class="s0">#%% md 
+</span><span class="s1">Zbiór jest podzielany na treningowy, testowy i walidaycyjny. Zbiór treningowy składa się z 9285 obrazków podzielonych na 75 podzbiorów jeden dla każdego gatunku, a testowy i walidacyjny mają po 375 również podzielone na 75 podzbiorów i w każdym jest po 5 zdjęć danego gatunku. Każdy obrazek jest wymiaru 224x224 w formacie jpg w wersji RGB.  
+</span><span class="s0">#%% 
+</span><span class="s1">(train_loader</span><span class="s2">, </span><span class="s1">train_data) = get_data_loaders(dataset_path</span><span class="s2">, </span><span class="s4">128</span><span class="s2">, </span><span class="s1">train=</span><span class="s2">True</span><span class="s1">)</span>
+<span class="s1">(val_loader</span><span class="s2">, </span><span class="s1">test_loader</span><span class="s2">, </span><span class="s1">valid_data</span><span class="s2">, </span><span class="s1">test_data) = get_data_loaders(dataset_path</span><span class="s2">, </span><span class="s4">32</span><span class="s2">, </span><span class="s1">train=</span><span class="s2">False</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s1">train_data_len = len(train_data)</span>
+<span class="s1">test_data_len = len(test_data)</span>
+<span class="s1">valid_data_len = len(valid_data)</span>
+<span class="s0">#%% 
+</span><span class="s1">print(train_data_len) </span>
+<span class="s1">print(test_data_len)</span>
+<span class="s1">print(valid_data_len) </span>
+<span class="s0">#%% md 
+</span><span class="s1">Klasy na jakie podzielony jest zbiór: 
+</span><span class="s0">#%% 
+</span><span class="s1">classes = get_classes(</span><span class="s3">&quot;gdrive/MyDrive/butterfly-images40-species/train/&quot;</span><span class="s1">)</span>
+<span class="s1">print(classes</span><span class="s2">, </span><span class="s1">len(classes))</span>
+<span class="s0">#%% 
+</span><span class="s1">dataloaders = {</span>
+    <span class="s3">&quot;train&quot;</span><span class="s1">: train_loader</span><span class="s2">,</span>
+    <span class="s3">&quot;val&quot;</span><span class="s1">: val_loader</span>
+<span class="s1">}</span>
+<span class="s1">dataset_sizes = {</span>
+    <span class="s3">&quot;train&quot;</span><span class="s1">: train_data_len</span><span class="s2">,</span>
+    <span class="s3">&quot;val&quot;</span><span class="s1">: valid_data_len</span>
+<span class="s1">}</span>
+<span class="s1">dataset = {</span>
+    <span class="s3">&quot;train&quot;</span><span class="s1">: train_data</span><span class="s2">,</span>
+    <span class="s3">&quot;val&quot;</span><span class="s1">: valid_data</span>
+<span class="s1">}</span>
+<span class="s0">#%% 
+</span><span class="s1">print(len(train_loader)</span><span class="s2">, </span><span class="s1">len(val_loader)</span><span class="s2">, </span><span class="s1">len(test_loader))</span>
+<span class="s0">#%% 
+</span><span class="s1">print(train_data_len</span><span class="s2">, </span><span class="s1">valid_data_len</span><span class="s2">, </span><span class="s1">test_data_len)</span>
+<span class="s0">#%% 
+# now, for the model</span>
+<span class="s1">device = torch.device(</span><span class="s3">'cuda' </span><span class="s2">if </span><span class="s1">torch.cuda.is_available() </span><span class="s2">else </span><span class="s3">'cpu'</span><span class="s1">)</span>
+<span class="s1">device</span>
+<span class="s0">#%% md 
+</span><span class="s1">Załadowanie modelu EfficientNet-B0 trenowany na Butterfly 
+</span><span class="s0">#%% 
+</span><span class="s1">model = timm.create_model(</span><span class="s3">&quot;efficientnet_b0&quot;</span><span class="s2">, </span><span class="s1">pretrained=</span><span class="s2">True</span><span class="s1">)</span>
+
+<span class="s0">#%% 
+</span><span class="s2">for </span><span class="s1">param </span><span class="s2">in </span><span class="s1">model.parameters(): </span><span class="s0">#freeze model</span>
+    <span class="s1">param.requires_grad = </span><span class="s2">False</span>
+
+<span class="s1">n_inputs = model.classifier.in_features</span>
+<span class="s1">model.classifier = nn.Sequential(</span>
+    <span class="s1">nn.Linear(n_inputs</span><span class="s2">, </span><span class="s4">512</span><span class="s1">)</span><span class="s2">,</span>
+    <span class="s1">nn.ReLU()</span><span class="s2">,</span>
+    <span class="s1">nn.Dropout(</span><span class="s4">0.3</span><span class="s1">)</span><span class="s2">,</span>
+    <span class="s1">nn.Linear(</span><span class="s4">512</span><span class="s2">, </span><span class="s1">len(classes))</span>
+<span class="s1">)</span>
+<span class="s1">model = model.to(device)</span>
+<span class="s1">print(model.classifier)</span>
+<span class="s0">#%% 
+</span><span class="s1">criterion = LabelSmoothingCrossEntropy()</span>
+<span class="s1">criterion = criterion.to(device)</span>
+<span class="s1">optimizer = optim.AdamW(model.classifier.parameters()</span><span class="s2">, </span><span class="s1">lr=</span><span class="s4">0.001</span><span class="s1">)</span>
+<span class="s0">#%% 
+# lr scheduler</span>
+<span class="s1">exp_lr_scheduler = optim.lr_scheduler.StepLR(optimizer</span><span class="s2">, </span><span class="s1">step_size=</span><span class="s4">3</span><span class="s2">, </span><span class="s1">gamma=</span><span class="s4">0.97</span><span class="s1">)</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Trenowanie modelu 
+</span><span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">train_model(model</span><span class="s2">, </span><span class="s1">criterion</span><span class="s2">, </span><span class="s1">optimizer</span><span class="s2">, </span><span class="s1">scheduler</span><span class="s2">, </span><span class="s1">num_epochs=</span><span class="s4">10</span><span class="s1">):</span>
+    <span class="s1">since = time.time()</span>
+    <span class="s1">best_model_wts = copy.deepcopy(model.state_dict())</span>
+    <span class="s1">best_acc = </span><span class="s4">0.0</span>
+
+    <span class="s2">for </span><span class="s1">epoch </span><span class="s2">in </span><span class="s1">range(num_epochs):</span>
+        <span class="s1">print(</span><span class="s3">f'Epoch </span><span class="s2">{</span><span class="s1">epoch</span><span class="s2">}</span><span class="s3">/</span><span class="s2">{</span><span class="s1">num_epochs - </span><span class="s4">1</span><span class="s2">}</span><span class="s3">'</span><span class="s1">)</span>
+        <span class="s1">print(</span><span class="s3">&quot;-&quot;</span><span class="s1">*</span><span class="s4">10</span><span class="s1">)</span>
+
+        <span class="s2">for </span><span class="s1">phase </span><span class="s2">in </span><span class="s1">[</span><span class="s3">'train'</span><span class="s2">, </span><span class="s3">'val'</span><span class="s1">]: </span><span class="s0"># We do training and validation phase per epoch</span>
+            <span class="s2">if </span><span class="s1">phase == </span><span class="s3">'train'</span><span class="s1">:</span>
+                <span class="s1">model.train() </span><span class="s0"># model to training mode</span>
+            <span class="s2">else</span><span class="s1">:</span>
+                <span class="s1">model.eval() </span><span class="s0"># model to evaluate</span>
+
+            <span class="s1">running_loss = </span><span class="s4">0.0</span>
+            <span class="s1">running_corrects = </span><span class="s4">0.0</span>
+
+            <span class="s2">for </span><span class="s1">inputs</span><span class="s2">, </span><span class="s1">labels </span><span class="s2">in </span><span class="s1">tqdm(dataloaders[phase]):</span>
+                <span class="s1">inputs = inputs.to(device)</span>
+                <span class="s1">labels = labels.to(device)</span>
+
+                <span class="s1">optimizer.zero_grad()</span>
+
+                <span class="s2">with </span><span class="s1">torch.set_grad_enabled(phase == </span><span class="s3">'train'</span><span class="s1">): </span><span class="s0"># no autograd makes validation go faster</span>
+                    <span class="s1">outputs = model(inputs)</span>
+                    <span class="s1">_</span><span class="s2">, </span><span class="s1">preds = torch.max(outputs</span><span class="s2">, </span><span class="s4">1</span><span class="s1">) </span><span class="s0"># used for accuracy</span>
+                    <span class="s1">loss = criterion(outputs</span><span class="s2">, </span><span class="s1">labels)</span>
+
+                    <span class="s2">if </span><span class="s1">phase == </span><span class="s3">'train'</span><span class="s1">:</span>
+                        <span class="s1">loss.backward()</span>
+                        <span class="s1">optimizer.step()</span>
+                <span class="s1">running_loss += loss.item() * inputs.size(</span><span class="s4">0</span><span class="s1">)</span>
+                <span class="s1">running_corrects += torch.sum(preds == labels.data)</span>
+
+            <span class="s2">if </span><span class="s1">phase == </span><span class="s3">'train'</span><span class="s1">:</span>
+                <span class="s1">scheduler.step() </span><span class="s0"># step at end of epoch</span>
+
+            <span class="s1">epoch_loss = running_loss / dataset_sizes[phase]</span>
+            <span class="s1">epoch_acc =  running_corrects.double() / dataset_sizes[phase]</span>
+
+            <span class="s1">print(</span><span class="s3">&quot;{} Loss: {:.4f} Acc: {:.4f}&quot;</span><span class="s1">.format(phase</span><span class="s2">, </span><span class="s1">epoch_loss</span><span class="s2">, </span><span class="s1">epoch_acc))</span>
+
+            <span class="s2">if </span><span class="s1">phase == </span><span class="s3">'val' </span><span class="s2">and </span><span class="s1">epoch_acc &gt; best_acc:</span>
+                <span class="s1">best_acc = epoch_acc</span>
+                <span class="s1">best_model_wts = copy.deepcopy(model.state_dict()) </span><span class="s0"># keep the best validation accuracy model</span>
+        <span class="s1">print()</span>
+    <span class="s1">time_elapsed = time.time() - since </span><span class="s0"># slight error</span>
+    <span class="s1">print(</span><span class="s3">'Training complete in {:.0f}m {:.0f}s'</span><span class="s1">.format(time_elapsed // </span><span class="s4">60</span><span class="s2">, </span><span class="s1">time_elapsed % </span><span class="s4">60</span><span class="s1">))</span>
+    <span class="s1">print(</span><span class="s3">&quot;Best Val Acc: {:.4f}&quot;</span><span class="s1">.format(best_acc))</span>
+
+    <span class="s1">model.load_state_dict(best_model_wts)</span>
+    <span class="s2">return </span><span class="s1">model</span>
+<span class="s0">#%% 
+</span><span class="s1">model_ft = train_model(model</span><span class="s2">, </span><span class="s1">criterion</span><span class="s2">, </span><span class="s1">optimizer</span><span class="s2">, </span><span class="s1">exp_lr_scheduler</span><span class="s2">, </span><span class="s1">num_epochs=</span><span class="s4">3</span><span class="s1">) </span><span class="s0"># now it is a lot faster</span>
+<span class="s0"># I will come back after 10 epochs</span>
+<span class="s0">#%% md 
+</span><span class="s1">Po wykonaniu 3 pętli uzyskano wynik 90% accuracy. 
+</span><span class="s0">#%% md 
+</span><span class="s1"># Testowanie 
+</span><span class="s0">#%% 
+</span><span class="s1">test_loss = </span><span class="s4">0.0</span>
+<span class="s1">class_correct = list(</span><span class="s4">0 </span><span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">range(len(classes)))</span>
+<span class="s1">class_total = list(</span><span class="s4">0 </span><span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">range(len(classes)))</span>
+<span class="s1">model_ft.eval()</span>
+
+<span class="s2">for </span><span class="s1">data</span><span class="s2">, </span><span class="s1">target </span><span class="s2">in </span><span class="s1">tqdm(test_loader):</span>
+    <span class="s1">data</span><span class="s2">, </span><span class="s1">target = data.to(device)</span><span class="s2">, </span><span class="s1">target.to(device)</span>
+    <span class="s2">with </span><span class="s1">torch.no_grad(): </span><span class="s0"># turn off autograd for faster testing</span>
+        <span class="s1">output = model_ft(data)</span>
+        <span class="s1">loss = criterion(output</span><span class="s2">, </span><span class="s1">target)</span>
+    <span class="s1">test_loss = loss.item() * data.size(</span><span class="s4">0</span><span class="s1">)</span>
+    <span class="s1">_</span><span class="s2">, </span><span class="s1">pred = torch.max(output</span><span class="s2">, </span><span class="s4">1</span><span class="s1">)</span>
+    <span class="s1">correct_tensor = pred.eq(target.data.view_as(pred))</span>
+    <span class="s1">correct = np.squeeze(correct_tensor.cpu().numpy())</span>
+    <span class="s2">if </span><span class="s1">len(target) == </span><span class="s4">32</span><span class="s1">:</span>
+        <span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">range(</span><span class="s4">32</span><span class="s1">):</span>
+            <span class="s1">label = target.data[i]</span>
+            <span class="s1">class_correct[label] += correct[i].item()</span>
+            <span class="s1">class_total[label] += </span><span class="s4">1</span>
+
+<span class="s1">test_loss = test_loss / test_data_len</span>
+<span class="s1">print(</span><span class="s3">'Test Loss: {:.4f}'</span><span class="s1">.format(test_loss))</span>
+<span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">range(len(classes)):</span>
+    <span class="s2">if </span><span class="s1">class_total[i] &gt; </span><span class="s4">0</span><span class="s1">:</span>
+        <span class="s1">print(</span><span class="s3">&quot;Test Accuracy of %5s: %2d%% (%2d/%2d)&quot; </span><span class="s1">% (</span>
+            <span class="s1">classes[i]</span><span class="s2">, </span><span class="s4">100</span><span class="s1">*class_correct[i]/class_total[i]</span><span class="s2">, </span><span class="s1">np.sum(class_correct[i])</span><span class="s2">, </span><span class="s1">np.sum(class_total[i])</span>
+        <span class="s1">))</span>
+    <span class="s2">else</span><span class="s1">:</span>
+        <span class="s1">print(</span><span class="s3">&quot;Test accuracy of %5s: NA&quot; </span><span class="s1">% (classes[i]))</span>
+<span class="s1">print(</span><span class="s3">&quot;Test Accuracy of %2d%% (%2d/%2d)&quot; </span><span class="s1">% (</span>
+    <span class="s4">100</span><span class="s1">*np.sum(class_correct)/np.sum(class_total)</span><span class="s2">, </span><span class="s1">np.sum(class_correct)</span><span class="s2">, </span><span class="s1">np.sum(class_total)</span>
+<span class="s1">))</span>
+<span class="s0">#%% md 
+</span><span class="s1">Accuracy na zbiorze testowym wynosi 87%. 
+</span><span class="s0">#%% md 
+</span><span class="s1">##Wyjaśnienia klasyfikowanych zdjęć 
+</span><span class="s0">#%% 
+</span><span class="s1">example = torch.rand(</span><span class="s4">1</span><span class="s2">, </span><span class="s4">3</span><span class="s2">, </span><span class="s4">224</span><span class="s2">, </span><span class="s4">224</span><span class="s1">)</span>
+<span class="s1">traced_script_module = torch.jit.trace(model.cpu()</span><span class="s2">, </span><span class="s1">example)</span>
+<span class="s1">traced_script_module.save(</span><span class="s3">&quot;butterfly_swin_transformer.pt&quot;</span><span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s1">images</span><span class="s2">, </span><span class="s1">labels = next(iter(train_loader))</span>
+<span class="s0">#%% 
+</span><span class="s2">from </span><span class="s1">captum.attr </span><span class="s2">import </span><span class="s1">visualization</span>
+
+<span class="s2">def </span><span class="s1">show_attr(attr_map):</span>
+    <span class="s1">visualization.visualize_image_attr(</span>
+        <span class="s1">attr_map.permute(</span><span class="s4">1</span><span class="s2">, </span><span class="s4">2</span><span class="s2">, </span><span class="s4">0</span><span class="s1">).numpy()</span><span class="s2">,</span>
+        <span class="s1">method=</span><span class="s3">'heat_map'</span><span class="s2">,</span>
+        <span class="s1">sign=</span><span class="s3">'all'</span><span class="s2">,</span>
+        <span class="s1">show_colorbar=</span><span class="s2">True</span>
+    <span class="s1">)</span>
+
+<span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">mask(image):</span>
+  <span class="s2">return </span><span class="s1">segmentation.slic(</span>
+    <span class="s1">image.permute(</span><span class="s4">1</span><span class="s2">, </span><span class="s4">2</span><span class="s2">, </span><span class="s4">0</span><span class="s1">).mean(axis=</span><span class="s4">2</span><span class="s1">)</span><span class="s2">, </span>
+    <span class="s1">n_segments=</span><span class="s4">100</span><span class="s2">, </span>
+    <span class="s1">compactness=</span><span class="s4">0.1</span><span class="s2">, </span>
+    <span class="s1">start_label=</span><span class="s4">0</span><span class="s2">,</span>
+  <span class="s1">)</span>
+
+<span class="s0">#%% md 
+</span><span class="s1">Normalizowanie obrazków wejściowych 
+</span><span class="s0">#%% 
+</span><span class="s1">preprocess = torchvision.transforms.Compose([</span>
+   <span class="s1">torchvision.transforms.Normalize(</span>
+       <span class="s1">mean=[</span><span class="s4">0.485</span><span class="s2">, </span><span class="s4">0.456</span><span class="s2">, </span><span class="s4">0.406</span><span class="s1">]</span><span class="s2">,</span>
+       <span class="s1">std=[</span><span class="s4">0.229</span><span class="s2">, </span><span class="s4">0.224</span><span class="s2">, </span><span class="s4">0.225</span><span class="s1">]</span>
+   <span class="s1">)</span>
+<span class="s1">])</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Local interpretable model-agnostic explanations (LIME) 
+</span><span class="s0">#%% 
+</span><span class="s1">explainer = Lime(model)</span>
+<span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">attr(i):</span>
+  <span class="s2">return </span><span class="s1">explainer.attribute(</span>
+    <span class="s1">preprocess(images[i].unsqueeze(</span><span class="s4">0</span><span class="s1">))</span><span class="s2">, </span>
+    <span class="s1">target=labels[i]</span><span class="s2">, </span>
+    <span class="s1">n_samples=</span><span class="s4">200</span><span class="s2">, </span>
+    <span class="s1">feature_mask=torch.as_tensor(mask(images[i]))</span><span class="s2">,</span>
+    <span class="s1">show_progress=</span><span class="s2">False</span>
+  <span class="s1">)</span>
+<span class="s0">#%% 
+</span><span class="s1">show_attr(attr(</span><span class="s4">3</span><span class="s1">)[</span><span class="s4">0</span><span class="s1">])</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Integrated Gradients (IG) 
+</span><span class="s0">#%% 
+</span><span class="s1">exp_ig = IntegratedGradients(model)</span>
+<span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">attr_ig(i):</span>
+   <span class="s2">return </span><span class="s1">exp_ig.attribute(</span>
+       <span class="s1">preprocess(images[i].unsqueeze(</span><span class="s4">0</span><span class="s1">))</span><span class="s2">, </span><span class="s1">target=labels[i])</span>
+<span class="s0">#%% 
+</span><span class="s1">show_attr(attr_ig(</span><span class="s4">3</span><span class="s1">)[</span><span class="s4">0</span><span class="s1">])</span>
+<span class="s0">#%% md 
+</span><span class="s1">## SHapley Additive exPlanations (SHAP) 
+</span><span class="s0">#%% 
+</span><span class="s1">exp_ks = KernelShap(model)</span>
+
+<span class="s2">def </span><span class="s1">attr_ks(i):</span>
+  <span class="s2">return </span><span class="s1">exp_ks.attribute(</span>
+    <span class="s1">preprocess(images[i].unsqueeze(</span><span class="s4">0</span><span class="s1">))</span><span class="s2">, </span>
+    <span class="s1">target=labels[i]</span><span class="s2">, </span>
+    <span class="s1">n_samples=</span><span class="s4">200</span><span class="s2">, </span>
+    <span class="s1">feature_mask=torch.as_tensor(mask(images[i]))</span><span class="s2">,</span>
+    <span class="s1">show_progress=</span><span class="s2">False</span>
+  <span class="s1">)</span>
+
+<span class="s1">show_attr(attr_ks(</span><span class="s4">3</span><span class="s1">)[</span><span class="s4">0</span><span class="s1">])</span>
+
+<span class="s0">#%% 
+</span><span class="s2">def </span><span class="s1">show_image_mask_explanation(nums):</span>
+  <span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">nums:</span>
+    <span class="s1">fig</span><span class="s2">, </span><span class="s1">ax = plt.subplots(</span><span class="s4">1</span><span class="s2">, </span><span class="s4">5</span><span class="s2">, </span><span class="s1">figsize=[</span><span class="s4">6 </span><span class="s1">* </span><span class="s4">2</span><span class="s2">, </span><span class="s4">6</span><span class="s1">])</span>
+    <span class="s1">ax[</span><span class="s4">0</span><span class="s1">].imshow(images[i].permute(</span><span class="s4">1</span><span class="s2">, </span><span class="s4">2</span><span class="s2">, </span><span class="s4">0</span><span class="s1">))</span>
+    <span class="s1">ax[</span><span class="s4">0</span><span class="s1">].set_title(</span><span class="s3">&quot;image&quot;</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">1</span><span class="s1">].imshow(mask(images[i])</span><span class="s2">, </span><span class="s1">cmap=</span><span class="s3">&quot;flag&quot;</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">1</span><span class="s1">].set_title(</span><span class="s3">&quot;segmentation mask&quot;</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">2</span><span class="s1">].imshow(attr(i)[</span><span class="s4">0</span><span class="s1">].mean(axis=</span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s1">vmin=-</span><span class="s4">1</span><span class="s2">, </span><span class="s1">vmax=</span><span class="s4">1</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">2</span><span class="s1">].set_title(</span><span class="s3">&quot;LIME&quot;</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">3</span><span class="s1">].imshow(attr_ig(i)[</span><span class="s4">0</span><span class="s1">].mean(axis=</span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s1">vmin=-</span><span class="s4">1</span><span class="s2">, </span><span class="s1">vmax=</span><span class="s4">1</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">3</span><span class="s1">].set_title(</span><span class="s3">&quot;IG&quot;</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">4</span><span class="s1">].imshow(attr_ks(i)[</span><span class="s4">0</span><span class="s1">].mean(axis=</span><span class="s4">0</span><span class="s1">)</span><span class="s2">, </span><span class="s1">vmin=-</span><span class="s4">1</span><span class="s2">, </span><span class="s1">vmax=</span><span class="s4">1</span><span class="s1">)</span>
+    <span class="s1">ax[</span><span class="s4">4</span><span class="s1">].set_title(</span><span class="s3">&quot;SHAP&quot;</span><span class="s1">)</span>
+    <span class="s1">plt.show()</span>
+    
+<span class="s0">#%% 
+</span><span class="s1">indexes = np.array([</span><span class="s4">3</span><span class="s2">, </span><span class="s4">23</span><span class="s2">, </span><span class="s4">12</span><span class="s2">, </span><span class="s4">1</span><span class="s2">, </span><span class="s4">120</span><span class="s1">])</span>
+<span class="s0">#%% 
+</span><span class="s1">show_image_mask_explanation(indexes)</span>
+<span class="s0">#%% md 
+</span><span class="s1">##Błędnie zakwalifikowane zdjęcia 
+</span><span class="s0">#%% 
+</span><span class="s1">test_loss = </span><span class="s4">0.0</span>
+<span class="s0"># model_ft.eval()</span>
+<span class="s1">i = </span><span class="s4">0</span><span class="s1">;</span>
+<span class="s2">for </span><span class="s1">data</span><span class="s2">, </span><span class="s1">target </span><span class="s2">in </span><span class="s1">tqdm(test_loader</span><span class="s2">, </span><span class="s1">total = test_data_len):</span>
+  <span class="s2">with </span><span class="s1">torch.no_grad(): </span>
+      <span class="s1">output = model_ft(data)</span>
+      <span class="s1">loss = criterion(output</span><span class="s2">, </span><span class="s1">target)</span>
+  <span class="s1">_</span><span class="s2">, </span><span class="s1">pred = torch.max(output</span><span class="s2">, </span><span class="s4">1</span><span class="s1">)</span>
+  <span class="s1">correct_tensor = pred.eq(target.data.view_as(pred))</span>
+
+  <span class="s1">correct = np.squeeze(correct_tensor.cpu().numpy())</span>
+     
+  <span class="s2">for </span><span class="s1">i </span><span class="s2">in </span><span class="s1">range(len(correct)):</span>
+    <span class="s2">if</span><span class="s1">(correct[i] == </span><span class="s2">False</span><span class="s1">):</span>
+      <span class="s1">show_image_mask_explanation([i])</span>
+      <span class="s1">print(</span><span class="s3">f'Predict: </span><span class="s2">{</span><span class="s1">classes[pred[i]]</span><span class="s2">}</span><span class="s3">, real: </span><span class="s2">{</span><span class="s1">classes[target[i]]</span><span class="s2">}</span><span class="s3">'</span><span class="s1">)</span>
+    <span class="s1">i = i+</span><span class="s4">1</span>
+    <span class="s2">if </span><span class="s1">(i &gt; </span><span class="s4">9</span><span class="s1">):</span>
+      <span class="s2">break</span>
+</pre>
+</body>
+</html>
