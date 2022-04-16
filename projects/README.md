@@ -21,7 +21,7 @@ Podstawowy plan projektu zakłada wytrenowanie modeli klasyfikacyjnych na wybran
 
 ## Harmonogram i szczegóły
 
-1. Na **04-21**: raport z **KM1** w postaci jupyter notebook
+1. Na **04-22\***: raport z **KM1** w postaci jupyter notebook
 - Wybranie i poprawne zdefiniowanie problemu do rozwiązania (1pkt)
 - Wstępne podejście do modelowania danych związanych z artykułem (2pkt)
 - 3x [TL;DR wybranego artykułu z dziedziny + dobra i słaba strona artykułu + zaleta/wada metody, danych etc. (łącznie 4-5 zdań)] (3pkt)
