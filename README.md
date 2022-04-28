@@ -1,6 +1,6 @@
 # WB-XIC: Explaining Image Classification
 
-Semestr Wiosenny 2021/22 [@hbaniecki](https://github.com/hbaniecki)
+Semestr Wiosenny 2021/22 [@hbaniecki](https://hbaniecki.com)
 
 ## Tematyka zajęć
 
@@ -110,7 +110,7 @@ Literatura:
   <tr>
     <td>10</td>
     <td>04-28</td>
-    <td>Przegląd wyjaśnień związanych z projektem i struktury artykułu.</td>
+    <td><a href="https://github.com/MI2-Education/2022L-WB-XIC/tree/main/labs/lab10" target="_blank">Przegląd postępów w projekcie i struktury raportu.</a></td>
     <td></td>
   </tr>
   <tr>
