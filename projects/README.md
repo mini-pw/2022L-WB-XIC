@@ -32,7 +32,7 @@ Podstawowy plan projektu zakłada wytrenowanie modeli klasyfikacyjnych na wybran
 - 3x [TL;DR wybranego artykułu z dziedziny + dobra i słaba strona artykułu + zaleta/wada metody, danych etc. (łącznie 4-5 zdań)] (3pkt)
 - Jakość raportu oraz wyniki ponad powyższy program (2pkt)
 3. Na **05-19**: raport z **KM3** w postaci jupyter notebook
-- Wyjaśnienie klasyfikatora metodami z labolatoriów (1pkt)
+- Wyjaśnienie klasyfikatora metodami z laboratoriów (1pkt)
 - Dopracowane podejście do wyjaśnień związanych z postawionym problemem (2pkt)
 - 3x [TL;DR wybranego artykułu z dziedziny + dobra i słaba strona artykułu + zaleta/wada metody, danych etc. (łącznie 4-5 zdań)] (3pkt)
 - Jakość raportu (1pkt)
