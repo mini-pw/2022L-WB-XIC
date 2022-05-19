@@ -152,5 +152,5 @@ Warszataty Badawcze składają się z wykładu, zajęć laboratoryjnych i projek
 
 -   praca podczas laboratoriów i projektu -- 6 x 8 pkt = 48 pkt.
 -   prezentacja końcowa na wykładzie -- 16 pkt. (deadline: 29 maja)
--   raport końcowy -- 32 pkt. (deadline: 3 czerwca)
+-   raport końcowy -- 32 pkt. (deadline: 9 czerwca)
 -   stosowanie dobrych praktyk wykorzystania GitHub -- 4 pkt.
