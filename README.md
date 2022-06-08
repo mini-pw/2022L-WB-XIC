@@ -135,13 +135,13 @@ Literatura:
     <td>14</td>
     <td>06-02</td>
     <td>*Prezentacja: <a href="https://github.com/hbaniecki/talks/blob/main/2021/mlinpl_manipulating.pdf" target="_blank">Manipulowanie wyjaśnieniami sieci neuronowych.</a></td>
-    <td>Raport</td>
+    <td>Raport v0.1</td>
   </tr>
   <tr>
     <td>15</td>
     <td>06-09</td>
     <td>Podsumowanie zajęć laboratoryjnych i projektowych.</td>
-    <td></td>
+    <td>Raport v1.0</td>
   </tr>
 </tbody>
 </table>
